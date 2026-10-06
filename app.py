@@ -716,9 +716,9 @@ elif is_privileged and workspace_mode == "📊 لوحة الإدارة":
     st.title("📊 لوحة تحكم الإدارة العامة والمحاسبة المالية")
     
     admin_section = st.sidebar.radio("🗂️ أقسام الإدارة:", [
-        "📥 استيراد مشتريات فودكس (سريع)",
+        "🛒 المشتريات",
         "📊 تقرير المدفوعات والمبيعات (مطابق للـ PDF)",
-        "🛒 إدخال المشتريات اليدوية",
+        "📋 إدخال جرد فرع",
         "📑 تقارير إغلاق الكاشيرات والطباعة",
         "⚖️ ميزان المخزون والجرد",
         "🍗 تحليل استهلاك الخامات الذكي",
@@ -730,49 +730,111 @@ elif is_privileged and workspace_mode == "📊 لوحة الإدارة":
         "✏️ تعديل وإلغاء الحركات"
     ])
 
-    if admin_section == "📥 استيراد مشتريات فودكس (سريع)":
-        st.subheader("📥 استيراد تقرير المشتريات من فودكس دفعة واحدة")
-        purchased_file = st.file_uploader("اختر ملف المشتريات (CSV)", type=["csv"], key="purchases_csv_uploader")
-        if purchased_file is not None:
-            try:
-                df_purchases = pd.read_csv(purchased_file)
-                st.success("تم قراءة الملف بنجاح! معاينة سريعة:")
-                st.dataframe(df_purchases.head(5))
-                imp_branch = st.selectbox("حدد الفرع المخصص لهذه الفاتورة المستوردة:", BRANCH_LIST, key="imp_br")
-                file_bytes = purchased_file.getvalue()
-                file_hash = hashlib.sha256(file_bytes).hexdigest()
-                already = cursor.execute("SELECT id, imported_at, branch FROM import_registry WHERE file_hash=?", (file_hash,)).fetchone()
-                if already:
-                    st.error(f"هذا الملف تم استيراده سابقًا (سجل #{already[0]} - الفرع {already[2]} - {already[1]}). تم منع التكرار.")
-                if st.button("🚀 ترحيل وحفظ المشتريات في قاعدة البيانات السحابية", type="primary", use_container_width=True, disabled=bool(already)):
-                    import_dates = [pd.to_datetime(r.get('Business Date', r.get('Date', date.today()))).date() for _, r in df_purchases.iterrows()]
-                    closed_months = sorted({month_key(d) for d in import_dates if is_period_closed(imp_branch, d)})
-                    if closed_months:
-                        st.error("الملف يحتوي حركات داخل فترات مغلقة: " + ", ".join(closed_months) + ". أعد فتح الفترة أو استخدم ملفًا صحيحًا."); st.stop()
-                    count = 0
-                    for index, row in df_purchases.iterrows():
-                        date_val = str(row.get('Business Date', row.get('Date', date.today())))
-                        inv_num_val = str(row.get('Invoice Number', row.get('Invoice', 'FOODICS-IMP')))
-                        supplier_val = str(row.get('Supplier Name', row.get('Supplier', 'مورد فودكس')))
-                        item_name_val = str(row.get('Item Name', row.get('Name', 'صنف فودكس')))
-                        item_sku_val = str(row.get('SKU', '0000'))
-                        qty_val = float(row.get('Quantity', row.get('Qty', 1.0)) or 0)
-                        total_cost_raw = float(row.get('Total Cost', row.get('Total', 0.0)) or 0)
-                        unit_cost_raw = row.get('Unit Cost', row.get('Cost Per Unit', row.get('Cost', None)))
-                        cost_val = float(unit_cost_raw) if unit_cost_raw not in (None, '') and not pd.isna(unit_cost_raw) else (total_cost_raw / qty_val if qty_val else 0.0)
-                        subtotal_val = total_cost_raw if total_cost_raw else cost_val * qty_val
-                        tot_tax_val = subtotal_val * 1.15
-                        cursor.execute("""
-                            INSERT INTO purchases_log (invoice_number, supplier_name, branch, invoice_date, item_sku, item_name, quantity, cost_per_unit, tax_percent, total_with_tax, created_by, entry_source, status)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'foodics_import', 'active')
-                        """, (inv_num_val, supplier_val, imp_branch, date_val, item_sku_val, item_name_val, qty_val, cost_val, 15.0, tot_tax_val, st.session_state.user))
-                        count += 1
-                    cursor.execute("INSERT INTO import_registry(import_type,file_name,file_hash,branch,row_count,imported_by) VALUES(?,?,?,?,?,?)", ("purchases", purchased_file.name, file_hash, imp_branch, count, st.session_state.user))
-                    conn.commit()
-                    st.success(f"تم ترحيل وحفظ {count} بند مشتريات بنجاح من ملف فودكس، وتم تسجيل بصمة الملف لمنع استيراده مرتين.")
-            except Exception as e:
-                st.error(f"حدث خطأ أثناء معالجة الملف: {e}")
+    if admin_section == "🛒 المشتريات":
+        st.subheader("🛒 المشتريات")
+        purchase_mode = st.radio(
+            "طريقة إدخال المشتريات:",
+            ["📥 استيراد من Foodics", "✍️ إدخال فاتورة يدويًا"],
+            horizontal=True,
+            key="purchase_mode_admin"
+        )
 
+        if purchase_mode == "📥 استيراد من Foodics":
+            st.markdown("### 📥 استيراد تقرير المشتريات من Foodics")
+            purchased_file = st.file_uploader("اختر ملف المشتريات (CSV)", type=["csv"], key="purchases_csv_uploader")
+            if purchased_file is not None:
+                try:
+                    df_purchases = pd.read_csv(purchased_file)
+                    st.success("تم قراءة الملف بنجاح! معاينة سريعة:")
+                    st.dataframe(df_purchases.head(5))
+                    imp_branch = st.selectbox("حدد الفرع المخصص لهذه الفاتورة المستوردة:", BRANCH_LIST, key="imp_br")
+                    file_bytes = purchased_file.getvalue()
+                    file_hash = hashlib.sha256(file_bytes).hexdigest()
+                    already = cursor.execute("SELECT id, imported_at, branch FROM import_registry WHERE file_hash=?", (file_hash,)).fetchone()
+                    if already:
+                        st.error(f"هذا الملف تم استيراده سابقًا (سجل #{already[0]} - الفرع {already[2]} - {already[1]}). تم منع التكرار.")
+                    if st.button("🚀 ترحيل وحفظ المشتريات في قاعدة البيانات السحابية", type="primary", use_container_width=True, disabled=bool(already)):
+                        import_dates = [pd.to_datetime(r.get('Business Date', r.get('Date', date.today()))).date() for _, r in df_purchases.iterrows()]
+                        closed_months = sorted({month_key(d) for d in import_dates if is_period_closed(imp_branch, d)})
+                        if closed_months:
+                            st.error("الملف يحتوي حركات داخل فترات مغلقة: " + ", ".join(closed_months) + ". أعد فتح الفترة أو استخدم ملفًا صحيحًا."); st.stop()
+                        count = 0
+                        for index, row in df_purchases.iterrows():
+                            date_val = str(row.get('Business Date', row.get('Date', date.today())))
+                            inv_num_val = str(row.get('Invoice Number', row.get('Invoice', 'FOODICS-IMP')))
+                            supplier_val = str(row.get('Supplier Name', row.get('Supplier', 'مورد فودكس')))
+                            item_name_val = str(row.get('Item Name', row.get('Name', 'صنف فودكس')))
+                            item_sku_val = str(row.get('SKU', '0000'))
+                            qty_val = float(row.get('Quantity', row.get('Qty', 1.0)) or 0)
+                            total_cost_raw = float(row.get('Total Cost', row.get('Total', 0.0)) or 0)
+                            unit_cost_raw = row.get('Unit Cost', row.get('Cost Per Unit', row.get('Cost', None)))
+                            cost_val = float(unit_cost_raw) if unit_cost_raw not in (None, '') and not pd.isna(unit_cost_raw) else (total_cost_raw / qty_val if qty_val else 0.0)
+                            subtotal_val = total_cost_raw if total_cost_raw else cost_val * qty_val
+                            tot_tax_val = subtotal_val * 1.15
+                            cursor.execute("""
+                                INSERT INTO purchases_log (invoice_number, supplier_name, branch, invoice_date, item_sku, item_name, quantity, cost_per_unit, tax_percent, total_with_tax, created_by, entry_source, status)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'foodics_import', 'active')
+                            """, (inv_num_val, supplier_val, imp_branch, date_val, item_sku_val, item_name_val, qty_val, cost_val, 15.0, tot_tax_val, st.session_state.user))
+                            count += 1
+                        cursor.execute("INSERT INTO import_registry(import_type,file_name,file_hash,branch,row_count,imported_by) VALUES(?,?,?,?,?,?)", ("purchases", purchased_file.name, file_hash, imp_branch, count, st.session_state.user))
+                        conn.commit()
+                        st.success(f"تم ترحيل وحفظ {count} بند مشتريات بنجاح من ملف فودكس، وتم تسجيل بصمة الملف لمنع استيراده مرتين.")
+                except Exception as e:
+                    st.error(f"حدث خطأ أثناء معالجة الملف: {e}")
+        else:
+            st.markdown("### ✍️ تسجيل فاتورة مشتريات يدويًا")
+            df_sups = pd.read_sql_query("SELECT name FROM suppliers_master ORDER BY name ASC", conn)
+            sup_list = df_sups['name'].tolist() if not df_sups.empty else ["مورد عام"]
+            df_inv_it = pd.read_sql_query("SELECT sku, name_ar, storage_unit FROM items_master WHERE item_type='inventory' ORDER BY name_ar ASC", conn)
+            inv_item_dict = {f"{r['name_ar']} ({r['sku']})": (r['sku'], r['name_ar'], r['storage_unit']) for _, r in df_inv_it.iterrows()}
+
+            h1, h2, h3, h4 = st.columns(4)
+            with h1: inv_number = st.text_input("رقم الفاتورة:", placeholder="INV-001")
+            with h2: inv_supplier = st.selectbox("المورد:", sup_list)
+            with h3: inv_branch = st.selectbox("الفرع:", BRANCH_LIST)
+            with h4: inv_date = st.date_input("التاريخ:", value=date.today())
+
+            if "pur_rows" not in st.session_state:
+                st.session_state.pur_rows = [{"item": list(inv_item_dict.keys())[0] if inv_item_dict else "", "qty": 1.0, "price": 10.0}]
+
+            grand_total = 0.0
+            for p_idx, p_row in enumerate(st.session_state.pur_rows):
+                col_p = st.columns([4, 2, 2, 2, 2, 1])
+                p_sel = col_p[0].selectbox(f"صنف {p_idx+1}", list(inv_item_dict.keys()) if inv_item_dict else ["لا توجد أصناف"], key=f"pur_it_{p_idx}")
+                p_row["item"] = p_sel
+                p_row["qty"] = col_p[1].number_input(f"كمية {p_idx+1}", min_value=0.1, step=1.0, value=p_row["qty"], key=f"pur_q_{p_idx}")
+
+                unit_p_dyn = inv_item_dict[p_sel][2] if p_sel in inv_item_dict else "pcs"
+                col_p[2].text_input(f"وحدة {p_idx+1}", value=unit_p_dyn, disabled=True, key=f"pur_u_{p_idx}")
+
+                p_row["price"] = col_p[3].number_input(f"سعر {p_idx+1}", min_value=0.0, step=0.5, value=p_row["price"], key=f"pur_p_{p_idx}")
+                row_tot = (p_row["qty"] * p_row["price"]) * 1.15
+                grand_total += row_tot
+                col_p[4].write(f"{row_tot:,.2f} SAR")
+                if col_p[5].button("❌", key=f"del_pur_{p_idx}"):
+                    if len(st.session_state.pur_rows) > 1:
+                        st.session_state.pur_rows.pop(p_idx)
+                        st.rerun()
+
+            if st.button("➕ إضافة صنف آخر"):
+                st.session_state.pur_rows.append({"item": list(inv_item_dict.keys())[0] if inv_item_dict else "", "qty": 1.0, "price": 10.0})
+                st.rerun()
+
+            st.metric("الإجمالي شامل الضريبة", f"{grand_total:,.2f} SAR")
+            if st.button("💾 حفظ الفاتورة", type="primary", use_container_width=True):
+                if not require_open_period(inv_branch, inv_date): st.stop()
+                _selected=[r["item"] for r in st.session_state.pur_rows if r["item"] in inv_item_dict]
+                if len(_selected) != len(set(_selected)):
+                    st.error("يوجد نفس الصنف أكثر من مرة في الفاتورة. اجمع الكمية في سطر واحد."); st.stop()
+                if inv_number.strip():
+                    for pr in st.session_state.pur_rows:
+                        if pr["item"] in inv_item_dict:
+                            p_sku, p_name, _ = inv_item_dict[pr["item"]]
+                            tot_r = (pr["qty"] * pr["price"]) * 1.15
+                            cursor.execute("INSERT INTO purchases_log (invoice_number, supplier_name, branch, invoice_date, item_sku, item_name, quantity, cost_per_unit, tax_percent, total_with_tax, created_by, entry_source, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'office_manual', 'active')", (inv_number.strip(), inv_supplier, inv_branch, str(inv_date), p_sku, p_name, pr["qty"], pr["price"], 15.0, tot_r, st.session_state.user))
+                    conn.commit()
+                    st.success("تم حفظ الفاتورة بنجاح!")
+                    st.session_state.pur_rows = [{"item": list(inv_item_dict.keys())[0] if inv_item_dict else "", "qty": 1.0, "price": 10.0}]
     elif admin_section == "📊 تقرير المدفوعات والمبيعات (مطابق للـ PDF)":
         st.subheader("📊 تحليل واستيراد ملف المدفوعات والمبيعات (مطابق تماماً لتقرير الـ PDF)")
         st.write("قم برفع ملف الـ CSV الخاص بالمدفوعات لتوليد تقرير موحد ومقسّم حسب الفروع وقنوات الدفع مع إمكانية التحميل بكافة الصيغ (PDF Landscape, Excel, CSV).")
@@ -828,60 +890,106 @@ elif is_privileged and workspace_mode == "📊 لوحة الإدارة":
             except Exception as e:
                 st.error(f"حدث خطأ أثناء معالجة ملف المدفوعات: {e}")
 
-    elif admin_section == "🛒 إدخال المشتريات اليدوية":
-        st.subheader("🛒 تسجيل فواتير المشتريات اليدوية")
-        df_sups = pd.read_sql_query("SELECT name FROM suppliers_master ORDER BY name ASC", conn)
-        sup_list = df_sups['name'].tolist() if not df_sups.empty else ["مورد عام"]
-        df_inv_it = pd.read_sql_query("SELECT sku, name_ar, storage_unit FROM items_master WHERE item_type='inventory' ORDER BY name_ar ASC", conn)
-        inv_item_dict = {f"{r['name_ar']} ({r['sku']})": (r['sku'], r['name_ar'], r['storage_unit']) for _, r in df_inv_it.iterrows()}
 
-        h1, h2, h3, h4 = st.columns(4)
-        with h1: inv_number = st.text_input("رقم الفاتورة:", placeholder="INV-001")
-        with h2: inv_supplier = st.selectbox("المورد:", sup_list)
-        with h3: inv_branch = st.selectbox("الفرع:", BRANCH_LIST)
-        with h4: inv_date = st.date_input("التاريخ:", value=date.today())
+    elif admin_section == "📋 إدخال جرد فرع":
+        st.subheader("📋 إدخال جرد فعلي لأي فرع")
+        st.caption("هذه الشاشة مخصصة للإدارة/المحاسب لإدخال الجرد بنفسه من تقرير ورقي أو أثناء الجرد المباشر.")
 
-        if "pur_rows" not in st.session_state:
-            st.session_state.pur_rows = [{"item": list(inv_item_dict.keys())[0] if inv_item_dict else "", "qty": 1.0, "price": 10.0}]
+        ac1, ac2, ac3 = st.columns(3)
+        with ac1:
+            admin_count_branch = st.selectbox("الفرع المراد جرده:", BRANCH_LIST, key="admin_count_branch")
+        with ac2:
+            admin_count_date = st.date_input("تاريخ الجرد:", value=date.today(), key="admin_count_date")
+        with ac3:
+            admin_count_id = st.text_input("معرف الجرد / رقم التقرير (اختياري):", key="admin_count_id")
 
-        grand_total = 0.0
-        for p_idx, p_row in enumerate(st.session_state.pur_rows):
-            col_p = st.columns([4, 2, 2, 2, 2, 1])
-            p_sel = col_p[0].selectbox(f"صنف {p_idx+1}", list(inv_item_dict.keys()) if inv_item_dict else ["لا توجد أصناف"], key=f"pur_it_{p_idx}")
-            p_row["item"] = p_sel
-            p_row["qty"] = col_p[1].number_input(f"كمية {p_idx+1}", min_value=0.1, step=1.0, value=p_row["qty"], key=f"pur_q_{p_idx}")
-            
-            unit_p_dyn = inv_item_dict[p_sel][2] if p_sel in inv_item_dict else "pcs"
-            col_p[2].text_input(f"وحدة {p_idx+1}", value=unit_p_dyn, disabled=True, key=f"pur_u_{p_idx}")
-            
-            p_row["price"] = col_p[3].number_input(f"سعر {p_idx+1}", min_value=0.0, step=0.5, value=p_row["price"], key=f"pur_p_{p_idx}")
-            row_tot = (p_row["qty"] * p_row["price"]) * 1.15
-            grand_total += row_tot
-            col_p[4].write(f"{row_tot:,.2f} SAR")
-            if col_p[5].button("❌", key=f"del_pur_{p_idx}"):
-                if len(st.session_state.pur_rows) > 1:
-                    st.session_state.pur_rows.pop(p_idx)
-                    st.rerun()
+        df_admin_count_items = pd.read_sql_query(
+            "SELECT sku, name_ar, storage_unit, ingredient_unit FROM items_master ORDER BY item_type, name_ar ASC",
+            conn
+        )
+        admin_count_map = {
+            f"{r['name_ar']} ({r['sku']})": (r['sku'], r['name_ar'], r['storage_unit'], r['ingredient_unit'])
+            for _, r in df_admin_count_items.iterrows()
+        }
 
-        if st.button("➕ إضافة صنف آخر"):
-            st.session_state.pur_rows.append({"item": list(inv_item_dict.keys())[0] if inv_item_dict else "", "qty": 1.0, "price": 10.0})
-            st.rerun()
+        if "admin_count_rows" not in st.session_state:
+            st.session_state.admin_count_rows = [{
+                "item": list(admin_count_map.keys())[0] if admin_count_map else "",
+                "q_st": 0.0, "q_in": 0.0
+            }]
 
-        st.metric("الإجمالي شامل الضريبة", f"{grand_total:,.2f} SAR")
-        if st.button("💾 حفظ الفاتورة", type="primary", use_container_width=True):
-            if not require_open_period(inv_branch, inv_date): st.stop()
-            _selected=[r["item"] for r in st.session_state.pur_rows if r["item"] in inv_item_dict]
-            if len(_selected) != len(set(_selected)):
-                st.error("يوجد نفس الصنف أكثر من مرة في الفاتورة. اجمع الكمية في سطر واحد."); st.stop()
-            if inv_number.strip():
-                for pr in st.session_state.pur_rows:
-                    if pr["item"] in inv_item_dict:
-                        p_sku, p_name, _ = inv_item_dict[pr["item"]]
-                        tot_r = (pr["qty"] * pr["price"]) * 1.15
-                        cursor.execute("INSERT INTO purchases_log (invoice_number, supplier_name, branch, invoice_date, item_sku, item_name, quantity, cost_per_unit, tax_percent, total_with_tax, created_by, entry_source, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'office_manual', 'active')", (inv_number.strip(), inv_supplier, inv_branch, str(inv_date), p_sku, p_name, pr["qty"], pr["price"], 15.0, tot_r, st.session_state.user))
-                conn.commit()
-                st.success("تم حفظ الفاتورة بنجاح!")
-                st.session_state.pur_rows = [{"item": list(inv_item_dict.keys())[0] if inv_item_dict else "", "qty": 1.0, "price": 10.0}]
+        st.markdown("#### 📦 أصناف الجرد")
+        for idx, c_row in enumerate(st.session_state.admin_count_rows):
+            cc = st.columns([4, 2, 2, 1])
+            choices = list(admin_count_map.keys()) if admin_count_map else ["لا توجد أصناف"]
+            selected = cc[0].selectbox(
+                f"صنف {idx+1}", choices,
+                index=choices.index(c_row["item"]) if c_row["item"] in choices else 0,
+                key=f"admin_cnt_item_{idx}"
+            )
+            c_row["item"] = selected
+            storage_unit = admin_count_map[selected][2] if selected in admin_count_map else "pcs"
+            ingredient_unit = admin_count_map[selected][3] if selected in admin_count_map else "pcs"
+            c_row["q_st"] = cc[1].number_input(
+                f"تخزين ({storage_unit}) {idx+1}", min_value=0.0, step=1.0,
+                value=float(c_row["q_st"]), key=f"admin_cnt_st_{idx}"
+            )
+            c_row["q_in"] = cc[2].number_input(
+                f"مكونات ({ingredient_unit}) {idx+1}", min_value=0.0, step=1.0,
+                value=float(c_row["q_in"]), key=f"admin_cnt_in_{idx}"
+            )
+            if cc[3].button("❌", key=f"admin_cnt_del_{idx}") and len(st.session_state.admin_count_rows) > 1:
+                st.session_state.admin_count_rows.pop(idx)
+                st.rerun()
+
+        add_c1, add_c2 = st.columns(2)
+        with add_c1:
+            if st.button("➕ إضافة صنف للجرد", use_container_width=True, key="admin_cnt_add"):
+                st.session_state.admin_count_rows.append({
+                    "item": list(admin_count_map.keys())[0] if admin_count_map else "",
+                    "q_st": 0.0, "q_in": 0.0
+                })
+                st.rerun()
+        with add_c2:
+            if st.button("📦 إضافة كل الأصناف غير المدرجة", use_container_width=True, key="admin_cnt_add_all"):
+                existing = {r["item"] for r in st.session_state.admin_count_rows}
+                for item in admin_count_map:
+                    if item not in existing:
+                        st.session_state.admin_count_rows.append({"item": item, "q_st": 0.0, "q_in": 0.0})
+                st.rerun()
+
+        if st.button("💾 حفظ جرد الفرع", type="primary", use_container_width=True, key="admin_cnt_save"):
+            if not require_open_period(admin_count_branch, admin_count_date):
+                st.stop()
+            selected_items = [r["item"] for r in st.session_state.admin_count_rows if r["item"] in admin_count_map]
+            if len(selected_items) != len(set(selected_items)):
+                st.error("يوجد نفس الصنف أكثر من مرة في الجرد. يجب أن يظهر كل صنف مرة واحدة فقط.")
+                st.stop()
+            saved = 0
+            for cr in st.session_state.admin_count_rows:
+                if cr["item"] in admin_count_map:
+                    sku, name, _, _ = admin_count_map[cr["item"]]
+                    cursor.execute("""
+                        INSERT INTO inventory_counts
+                        (branch, count_date, count_id, item_sku, item_name, storage_qty, ingredients_qty, created_by, entry_source, status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'office_manual', 'active')
+                    """, (
+                        admin_count_branch, str(admin_count_date), admin_count_id.strip(),
+                        sku, name, cr["q_st"], cr["q_in"], st.session_state.user
+                    ))
+                    saved += 1
+            conn.commit()
+            audit_action(
+                "inventory_counts", 0, "create_count", admin_count_branch, "",
+                {"date": str(admin_count_date), "count_id": admin_count_id.strip(), "rows": saved},
+                "جرد أدخلته الإدارة/المحاسب"
+            )
+            conn.commit()
+            st.success(f"تم حفظ جرد {admin_count_branch} بنجاح ({saved} صنف).")
+            st.session_state.admin_count_rows = [{
+                "item": list(admin_count_map.keys())[0] if admin_count_map else "",
+                "q_st": 0.0, "q_in": 0.0
+            }]
 
     elif admin_section == "📑 تقارير إغلاق الكاشيرات والطباعة":
         st.subheader("📑 تقارير إغلاق الكاشيرات ومطابقة الدفاتر")
@@ -936,25 +1044,89 @@ elif is_privileged and workspace_mode == "📊 لوحة الإدارة":
             st.dataframe(dfs_raw.head())
 
     elif admin_section == "🚀 تصدير قوالب فودكس":
-        st.subheader("🚀 تصدير ملفات فودكس المعتمدة")
+        st.subheader("🚀 تصدير قوالب Foodics")
+        st.caption("أزرار التصدير متاحة دائمًا. إذا لم توجد حركات في التاريخ المختار سيتم تنزيل قالب فارغ بالأعمدة المطلوبة.")
+
         ex_b = st.selectbox("الفرع:", BRANCH_LIST, key="ex_b_admin")
         ex_d = st.date_input("التاريخ:", value=date.today(), key="ex_d_admin")
+
+        # قالب الإنتاج: نستخدم movement_code حتى لا يختلط صرف الإنتاج مع الإنتاج الفعلي.
+        df_p = pd.read_sql_query("""
+            SELECT item_name AS name, item_sku AS sku,
+                   quantity AS storage_quantity, 0 AS ingredients_quantity
+            FROM operations_log
+            WHERE branch=? AND entry_date=? AND movement_code='PRODUCTION'
+              AND COALESCE(status,'active')='active'
+        """, conn, params=(ex_b, str(ex_d)))
+        production_cols = ["name", "sku", "storage_quantity", "ingredients_quantity"]
+        if df_p.empty:
+            df_p = pd.DataFrame(columns=production_cols)
+
+        # التحويلات المرسلة من جدول transfers الفعلي.
+        df_t = pd.read_sql_query("""
+            SELECT item_name AS name, item_sku AS sku,
+                   quantity_sent AS storage_quantity, 0 AS ingredients_quantity
+            FROM transfers
+            WHERE from_branch=? AND transfer_date=? AND status IN ('sent','received')
+        """, conn, params=(ex_b, str(ex_d)))
+        transfer_cols = ["name", "sku", "storage_quantity", "ingredients_quantity"]
+        if df_t.empty:
+            df_t = pd.DataFrame(columns=transfer_cols)
+
+        df_cnt = pd.read_sql_query("""
+            SELECT item_name AS 'Inventory Item Name',
+                   item_sku AS 'Inventory Item SKU',
+                   storage_qty AS 'Storage quantity',
+                   ingredients_qty AS 'Ingredients quantity',
+                   count_id AS 'Inventory Count ID'
+            FROM inventory_counts
+            WHERE branch=? AND count_date=? AND COALESCE(status,'active')='active'
+        """, conn, params=(ex_b, str(ex_d)))
+        count_cols = [
+            "Inventory Item Name", "Inventory Item SKU", "Storage quantity",
+            "Ingredients quantity", "Inventory Count ID"
+        ]
+        if df_cnt.empty:
+            df_cnt = pd.DataFrame(columns=count_cols)
+
+        st.markdown("#### 📥 ملفات التصدير")
         c_p, c_t, c_i = st.columns(3)
         with c_p:
-            df_p = pd.read_sql_query("SELECT item_name AS name, item_sku AS sku, quantity AS storage_quantity, 0 AS ingredients_quantity FROM operations_log WHERE branch=? AND entry_date=? AND entry_type LIKE '%إنتاج%'", conn, params=(ex_b, str(ex_d)))
-            if not df_p.empty: st.download_button("📥 تحميل production.csv", df_p.to_csv(index=False).encode('utf-8'), "production.csv")
-            else: st.warning("لا يوجد إنتاج")
+            st.write("**الإنتاج**")
+            st.caption(f"{len(df_p)} حركة في التاريخ المختار" if len(df_p) else "لا توجد حركات؛ سيتم تنزيل قالب فارغ")
+            st.download_button(
+                "⬇️ تصدير production.csv",
+                df_p.to_csv(index=False).encode("utf-8-sig"),
+                file_name=f"production_{ex_b}_{ex_d}.csv",
+                mime="text/csv",
+                use_container_width=True,
+                key="download_foodics_production"
+            )
         with c_t:
-            df_t = pd.read_sql_query("SELECT item_name AS name, item_sku AS sku, quantity AS storage_quantity, 0 AS ingredients_quantity FROM operations_log WHERE branch=? AND entry_date=? AND entry_type LIKE '%تحويل%'", conn, params=(ex_b, str(ex_d)))
-            if not df_t.empty: st.download_button("📥 تحميل transfer_sending.csv", df_t.to_csv(index=False).encode('utf-8'), "transfer_sending.csv")
-            else: st.warning("لا توجد تحويلات")
+            st.write("**التحويلات الصادرة**")
+            st.caption(f"{len(df_t)} حركة في التاريخ المختار" if len(df_t) else "لا توجد تحويلات؛ سيتم تنزيل قالب فارغ")
+            st.download_button(
+                "⬇️ تصدير transfer_sending.csv",
+                df_t.to_csv(index=False).encode("utf-8-sig"),
+                file_name=f"transfer_sending_{ex_b}_{ex_d}.csv",
+                mime="text/csv",
+                use_container_width=True,
+                key="download_foodics_transfer"
+            )
         with c_i:
-            df_cnt = pd.read_sql_query("SELECT item_name AS 'Inventory Item Name', item_sku AS 'Inventory Item SKU', storage_qty AS 'Storage quantity', ingredients_qty AS 'Ingredients quantity', count_id AS 'Inventory Count ID' FROM inventory_counts WHERE branch=? AND count_date=?", conn, params=(ex_b, str(ex_d)))
-            if not df_cnt.empty:
-                b_io = io.BytesIO()
-                with pd.ExcelWriter(b_io, engine='openpyxl') as wr: df_cnt.to_excel(wr, index=False)
-                st.download_button("📥 تحميل inventory-count.xlsx", b_io.getvalue(), "inventory-count.xlsx")
-            else: st.warning("لا يوجد جرد")
+            st.write("**الجرد**")
+            st.caption(f"{len(df_cnt)} بند جرد في التاريخ المختار" if len(df_cnt) else "لا يوجد جرد؛ سيتم تنزيل قالب فارغ")
+            count_buffer = io.BytesIO()
+            with pd.ExcelWriter(count_buffer, engine="openpyxl") as wr:
+                df_cnt.to_excel(wr, index=False, sheet_name="Inventory Count")
+            st.download_button(
+                "⬇️ تصدير inventory-count.xlsx",
+                count_buffer.getvalue(),
+                file_name=f"inventory-count_{ex_b}_{ex_d}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                key="download_foodics_count"
+            )
 
     elif admin_section == "📋 سجل العمليات اليومية":
         st.subheader("📋 سجل العمليات اليومية لكافة الفروع")
