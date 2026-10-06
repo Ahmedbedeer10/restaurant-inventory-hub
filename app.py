@@ -185,20 +185,30 @@ if not st.session_state.auth:
 
 st.sidebar.markdown(f"**المستخدم:** {st.session_state.name}")
 st.sidebar.markdown(f"**الفرع:** `{st.session_state.branch}`")
-if st.sidebar.button(t.get("logout", "خروج")):
-    st.session_state.auth = False
-    st.rerun()
+st.sidebar.divider()
 
-# ----------------- واجهة الكاشير / الفرع -----------------
+# ----------------- واجهة الكاشير / الفرع (التبويبات الجانبية) -----------------
 if st.session_state.role == "cashier":
-    st.title(f"📍 {t.get('role_cashier', 'بوابة الفرع')} - {st.session_state.name}")
-    c_mode = st.radio("القسم:", ["العمليات والتشغيل اليومي", "📝 تقرير الإغلاق المالي اليومي للكاشير", t.get("count_tab", "الجرد الدوري")], horizontal=True)
+    st.sidebar.markdown("### 🗂️ القائمة الرئيسية للفرع")
+    c_mode = st.sidebar.radio("القسم:", [
+        "العمليات والتشغيل اليومي", 
+        "📝 تقرير الإغلاق المالي", 
+        t.get("count_tab", "الجرد الدوري")
+    ])
 
+    st.title(f"📍 بوابة الفرع - {st.session_state.name}")
+
+    # 1. إدخال العمليات التشغيلية (الإنتاج، الهدر، المنصرف، التحويلات)
     if c_mode == "العمليات والتشغيل اليومي":
-        tab_type = st.radio("نوع العملية:", [
-            t.get("prod_tab", "الإنتاج"), t.get("staff_tab", "وجبات الموظفين"), 
-            t.get("consume_tab", "منصرف المخزن"), t.get("waste_tab", "الهدر"), t.get("transfer_tab", "التحويلات")
-        ], horizontal=True)
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("### ⚙️ نوع العملية")
+        tab_type = st.sidebar.radio("اختر الحركة:", [
+            t.get("prod_tab", "الإنتاج"), 
+            t.get("staff_tab", "وجبات الموظفين"), 
+            t.get("consume_tab", "منصرف المخزن"), 
+            t.get("waste_tab", "الهدر"), 
+            t.get("transfer_tab", "التحويلات")
+        ])
 
         target_source = "production" if tab_type in [t.get("prod_tab", "الإنتاج"), t.get("staff_tab", "وجبات الموظفين")] else "inventory"
         df_items = pd.read_sql_query("SELECT sku, name_ar, name_en, storage_unit FROM items_master WHERE item_type=? ORDER BY name_ar ASC", conn, params=(target_source,))
@@ -208,6 +218,7 @@ if st.session_state.role == "cashier":
         with c_top1: op_date = st.date_input("التاريخ:", value=date.today(), key="op_d")
         with c_top2: to_br = st.selectbox("تحويل إلى فرع:", [b for b in BRANCH_LIST if b != st.session_state.branch]) if tab_type == t.get("transfer_tab", "التحويلات") else "-"
 
+        st.markdown(f"#### 📋 تسجيل حركة: `{tab_type}` (أدخل عدة أصناف معاً)")
         if "ops_rows" not in st.session_state:
             st.session_state.ops_rows = [{"item": list(item_dict.keys())[0], "qty": 1.0, "reason": ""}]
 
@@ -231,35 +242,45 @@ if st.session_state.role == "cashier":
         if st.button("💾 حفظ كافة العمليات المسجلة في النظام", type="primary", use_container_width=True):
             for r in st.session_state.ops_rows:
                 s_sku, s_name, s_unit = item_dict[r["item"]]
-                cursor.execute("INSERT INTO operations_log (entry_type, branch, to_branch, entry_date, item_type, item_sku, item_name, quantity, unit, reason, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (tab_type, st.session_state.branch, to_br, str(op_date), target_source, s_sku, s_name, r["qty"], str(s_unit), r["reason"], st.session_state.user))
+                cursor.execute("""
+                INSERT INTO operations_log (entry_type, branch, to_branch, entry_date, item_type, item_sku, item_name, quantity, unit, reason, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (tab_type, st.session_state.branch, to_br, str(op_date), target_source, s_sku, s_name, r["qty"], str(s_unit), r["reason"], st.session_state.user))
             conn.commit()
             st.success(f"تم حفظ الحركات بنجاح!")
             st.session_state.ops_rows = [{"item": list(item_dict.keys())[0], "qty": 1.0, "reason": ""}]
 
-    elif c_mode == "📝 تقرير الإغلاق المالي اليومي للكاشير":
+    # 2. تقرير إغلاق الكاشير اليومي
+    elif c_mode == "📝 تقرير الإغلاق المالي":
+        st.subheader("📝 تقرير الإيرادات والمبيعات اليومية المستلمة (Daily Closing Sheet)")
         with st.form("cashier_closing_form"):
             c_f1, c_f2 = st.columns(2)
             with c_f1:
-                cl_date = st.date_input("التاريخ:", value=date.today())
-                c_name = st.text_input("اسم الكاشير:", value=st.session_state.name)
-                c_cash = st.number_input("المبيعات النقدية:", min_value=0.0, step=10.0)
-                c_mada = st.number_input("شبكة مدى:", min_value=0.0, step=10.0)
-                c_visa = st.number_input("فيزا:", min_value=0.0, step=10.0)
-                c_master = st.number_input("ماستركارد:", min_value=0.0, step=10.0)
-                c_trans = st.number_input("التحويلات البنكية:", min_value=0.0, step=10.0)
+                cl_date = st.date_input("التاريخ (Date):", value=date.today())
+                c_name = st.text_input("اسم الكاشير (Cashier Name):", value=st.session_state.name)
+                c_cash = st.number_input("المبيعات النقدية (Cash Sales):", min_value=0.0, step=10.0)
+                c_mada = st.number_input("شبكة مدى (Mada):", min_value=0.0, step=10.0)
+                c_visa = st.number_input("فيزا (Visa):", min_value=0.0, step=10.0)
+                c_master = st.number_input("ماستركارد (MasterCard):", min_value=0.0, step=10.0)
+                c_trans = st.number_input("التحويلات البنكية (Bank Transfers):", min_value=0.0, step=10.0)
             with c_f2:
-                c_hunger = st.number_input("هنقرستيشن:", min_value=0.0, step=10.0)
-                c_jahez = st.number_input("جاهز:", min_value=0.0, step=10.0)
-                c_ninja = st.number_input("نينجا:", min_value=0.0, step=10.0)
-                c_keeta = st.number_input("كيتا:", min_value=0.0, step=10.0)
-                c_exp_note = st.text_input("بيان المصروفات النثرية:", placeholder="مثال: فاتورة لبن")
-                c_exp_amt = st.number_input("مبلغ المصروفات:", min_value=0.0, step=1.0)
+                c_hunger = st.number_input("هنقرستيشن (Hungerstation):", min_value=0.0, step=10.0)
+                c_jahez = st.number_input("جاهز (Jahez):", min_value=0.0, step=10.0)
+                c_ninja = st.number_input("نينجا (Ninja):", min_value=0.0, step=10.0)
+                c_keeta = st.number_input("كيتا (Keeta):", min_value=0.0, step=10.0)
+                c_exp_note = st.text_input("بيان المصروفات النثرية / العجز:", placeholder="مثال: فاتورة لبن المراعي كبير")
+                c_exp_amt = st.number_input("مبلغ المصروفات النثرية (SAR):", min_value=0.0, step=1.0)
             c_total = c_cash + c_mada + c_visa + c_master + c_trans + c_hunger + c_jahez + c_ninja + c_keeta
-            st.metric("إجمالي المبيعات", f"{c_total:,.2f} SAR")
-            if st.form_submit_button("📤 إرسال التقرير للإدارة", type="primary", use_container_width=True):
-                cursor.execute("INSERT INTO cashier_closings (branch, closing_date, cashier_name, cash_sales, mada_sales, visa_sales, mastercard_sales, bank_transfers, hungerstation, jahez, ninja, keeta, expenses_notes, expenses_amount, total_sales, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (st.session_state.branch, str(cl_date), c_name, c_cash, c_mada, c_visa, c_master, c_trans, c_hunger, c_jahez, c_ninja, c_keeta, c_exp_note, c_exp_amt, c_total, st.session_state.user))
+            st.metric("إجمالي المبيعات اليومية المحسوبة", f"{c_total:,.2f} SAR")
+            if st.form_submit_button("📤 إرسال واعتماد التقرير المالي للإدارة", type="primary", use_container_width=True):
+                cursor.execute("""
+                INSERT INTO cashier_closings (branch, closing_date, cashier_name, cash_sales, mada_sales, visa_sales, mastercard_sales, bank_transfers, hungerstation, jahez, ninja, keeta, expenses_notes, expenses_amount, total_sales, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (st.session_state.branch, str(cl_date), c_name, c_cash, c_mada, c_visa, c_master, c_trans, c_hunger, c_jahez, c_ninja, c_keeta, c_exp_note, c_exp_amt, c_total, st.session_state.user))
                 conn.commit()
-                st.success("تم إرسال التقرير بنجاح!")
+                st.success("تم إرسال تقرير الإغلاق المالي بنجاح إلى الإدارة والمحاسب!")
+
+    # 3. الجرد الفعلي الدوري
     else:
         st.subheader("📋 الجرد الدوري الفعلي للمخزون")
         df_inv = pd.read_sql_query("SELECT sku, name_ar, storage_unit, ingredient_unit FROM items_master WHERE item_type='inventory' ORDER BY name_ar ASC", conn)
@@ -268,7 +289,7 @@ if st.session_state.role == "cashier":
         with ca:
             cnt_d = st.date_input("تاريخ الجرد:", value=date.today())
             sel_cnt = st.selectbox("الصنف:", list(cnt_map.keys()))
-            cnt_id = st.text_input("معرف الجرد فودكس:", placeholder="اختياري")
+            cnt_id = st.text_input("معرف الجرد في فودكس:", placeholder="اختياري")
         with cb:
             sk_c, nm_c, u_st, u_in = cnt_map[sel_cnt]
             q_st = st.number_input(f"كمية التخزين ({u_st}):", min_value=0.0, step=1.0)
@@ -278,11 +299,10 @@ if st.session_state.role == "cashier":
             conn.commit()
             st.success("تم حفظ الجرد بنجاح!")
 
-# ----------------- واجهة الإدارة والمحاسب (محدثة وواضحة) -----------------
+# ----------------- واجهة الإدارة والمحاسب -----------------
 elif st.session_state.role == "admin":
     st.title("📊 لوحة تحكم الإدارة العامة والمحاسبة المالية")
     
-    # قائمة جانبية أو اختيار واضح لتجنب اختفاء التبويبات الأفقية
     admin_section = st.sidebar.radio("🗂️ أقسام الإدارة:", [
         "📥 استيراد مشتريات فودكس (سريع)",
         "🛒 إدخال المشتريات اليدوية",
@@ -295,18 +315,13 @@ elif st.session_state.role == "admin":
 
     if admin_section == "📥 استيراد مشتريات فودكس (سريع)":
         st.subheader("📥 استيراد تقرير المشتريات من فودكس دفعة واحدة")
-        st.write("قم برفع ملف الـ CSV الخاص بالمشتريات المصدر من نظام فودكس لتحديث قاعدة البيانات السحابية فوراً.")
-        
         purchased_file = st.file_uploader("اختر ملف المشتريات (CSV)", type=["csv"], key="purchases_csv_uploader")
-        
         if purchased_file is not None:
             try:
                 df_purchases = pd.read_csv(purchased_file)
-                st.success("تم قراءة الملف بنجاح! معاينة سريعة للبيانات:")
+                st.success("تم قراءة الملف بنجاح! معاينة سريعة:")
                 st.dataframe(df_purchases.head(5))
-                
                 imp_branch = st.selectbox("حدد الفرع المخصص لهذه الفاتورة المستوردة:", BRANCH_LIST, key="imp_br")
-                
                 if st.button("🚀 ترحيل وحفظ المشتريات في قاعدة البيانات السحابية", type="primary", use_container_width=True):
                     count = 0
                     for index, row in df_purchases.iterrows():
@@ -318,15 +333,13 @@ elif st.session_state.role == "admin":
                         qty_val = float(row.get('Quantity', row.get('Qty', 1.0)))
                         cost_val = float(row.get('Total Cost', row.get('Cost', 0.0)))
                         tot_tax_val = cost_val * 1.15
-                        
                         cursor.execute("""
                             INSERT INTO purchases_log (invoice_number, supplier_name, branch, invoice_date, item_sku, item_name, quantity, cost_per_unit, tax_percent, total_with_tax, created_by)
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """, (inv_num_val, supplier_val, imp_branch, date_val, item_sku_val, item_name_val, qty_val, cost_val, 15.0, tot_tax_val, st.session_state.user))
                         count += 1
-                        
                     conn.commit()
-                    st.success(f"تم ترحيل وحفظ {count} بند مشتريات بنجاح من ملف فودكس إلى قاعدة البيانات!")
+                    st.success(f"تم ترحيل وحفظ {count} بند مشتريات بنجاح من ملف فودكس!")
             except Exception as e:
                 st.error(f"حدث خطأ أثناء معالجة الملف: {e}")
 
@@ -450,3 +463,9 @@ elif st.session_state.role == "admin":
     else:
         st.subheader("📋 سجل العمليات اليومية لكافة الفروع")
         st.dataframe(pd.read_sql_query("SELECT * FROM operations_log ORDER BY id DESC", conn), use_container_width=True)
+
+# زر تسجيل الخروج في أسفل القائمة الجانبية للجميع
+st.sidebar.divider()
+if st.sidebar.button(t.get("logout", "خروج من النظام"), use_container_width=True):
+    st.session_state.auth = False
+    st.rerun()
