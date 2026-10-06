@@ -7,8 +7,8 @@ from PIL import Image
 from datetime import date
 from translations import LANGUAGES
 
-# مكتبات توليد الـ PDF الحقيقي
-from reportlab.lib.pagesizes import letter
+# مكتبات توليد الـ PDF العريض (Landscape)
+from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
@@ -193,19 +193,18 @@ st.sidebar.markdown(f"**المستخدم:** {st.session_state.name}")
 st.sidebar.markdown(f"**الفرع:** `{st.session_state.branch}`")
 st.sidebar.divider()
 
-# دالة مساعدة لتوليد ملف PDF حقيقي من أي DataFrame
+# دالة توليد PDF بالوضع العرضي (Landscape) لتظهر كافة الأعمدة بوضوح تام
 def generate_pdf_report(df, title_text):
     pdf_buffer = io.BytesIO()
-    doc = SimpleDocTemplate(pdf_buffer, pagesize=letter, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+    doc = SimpleDocTemplate(pdf_buffer, pagesize=landscape(letter), rightMargin=20, leftMargin=20, topMargin=25, bottomMargin=25)
     elements = []
     
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], fontName='Helvetica-Bold', fontSize=16, alignment=1, spaceAfter=15)
+    title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], fontName='Helvetica-Bold', fontSize=14, alignment=1, spaceAfter=15)
     
     elements.append(Paragraph(title_text, title_style))
-    elements.append(Spacer(1, 10))
+    elements.append(Spacer(1, 5))
     
-    # تحويل بيانات الجدول إلى تنسيق ReportLab
     table_data = [list(df.columns)] + df.astype(str).values.tolist()
     
     t = Table(table_data)
@@ -213,12 +212,13 @@ def generate_pdf_report(df, title_text):
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2c3e50')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
         ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0,0), (-1,0), 10),
-        ('BOTTOMPADDING', (0,0), (-1,0), 8),
+        ('FONTSIZE', (0,0), (-1,0), 9),
+        ('BOTTOMPADDING', (0,0), (-1,0), 6),
         ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#ecf0f1')),
         ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-        ('FONTSIZE', (0,1), (-1,-1), 8),
+        ('FONTSIZE', (0,1), (-1,-1), 7.5),
     ]))
     
     elements.append(t)
@@ -228,7 +228,7 @@ def generate_pdf_report(df, title_text):
 
 # ----------------- واجهة الكاشير / الفرع -----------------
 if st.session_state.role == "cashier":
-    st.sidebar.markdown("### 🗂️ القائمة الرئيسية للفرع")
+    st.sidebar.markdown("### 🗂️️ القائمة الرئيسية للفرع")
     c_mode = st.sidebar.radio("القسم:", [
         "العمليات والتشغيل اليومي", 
         "🗑️ الهدر والتالف (الإنتاج والمخزون)",
@@ -288,7 +288,7 @@ if st.session_state.role == "cashier":
             st.success(f"تم حفظ الحركات بنجاح!")
             st.session_state.ops_rows = [{"item": list(item_dict.keys())[0], "qty": 1.0, "reason": ""}]
 
-    elif c_mode == "🗑️️ الهدر والتالف (الإنتاج والمخزون)":
+    elif c_mode == "🗑️ الهدر والتالف (الإنتاج والمخزون)":
         st.subheader("🗑️ تسجيل الهدر والتالف اليومي (منتجات نهائية أو خامات مخزن)")
         waste_target = st.radio("حدد نوع التالف/الهدر:", ["هدر إنتاج (منتجات نهائية)", "هدر خامات مخزن"], horizontal=True)
         w_source = "production" if "إنتاج" in waste_target else "inventory"
@@ -407,7 +407,7 @@ elif st.session_state.role == "admin":
 
     elif admin_section == "📊 تقرير المدفوعات والمبيعات (مطابق للـ PDF)":
         st.subheader("📊 تحليل واستيراد ملف المدفوعات والمبيعات (مطابق تماماً لتقرير الـ PDF)")
-        st.write("قم برفع ملف الـ CSV الخاص بالمدفوعات لتوليد تقرير موحد ومقسّم حسب الفروع وقنوات الدفع مع إمكانية التحميل بكافة الصيغ (PDF, Excel, CSV).")
+        st.write("قم برفع ملف الـ CSV الخاص بالمدفوعات لتوليد تقرير موحد ومقسّم حسب الفروع وقنوات الدفع مع إمكانية التحميل بكافة الصيغ (PDF Landscape, Excel, CSV).")
         
         uploaded_payment_file = st.file_uploader("اختر ملف المدفوعات المصدر من فودكس (CSV)", type=["csv"], key="pdf_like_report_uploader")
         
@@ -445,11 +445,11 @@ elif st.session_state.role == "admin":
                 st.success("✨ تم تحليل ملف المدفوعات وتوليد التقرير بنجاح مطابَقاً لنموذج الـ PDF!")
                 st.dataframe(final_report.style.format({c: "{:,.2f}" for c in final_report.columns if c != 'Branch Name'}), use_container_width=True)
                 
-                # أزرار التحميل بكافة الصيغ المطلوبة (PDF, Excel, CSV)
+                # أزرار التحميل بكافة الصيغ المطلوبة (PDF Landscape, Excel, CSV)
                 col_d1, col_d2, col_d3 = st.columns(3)
                 with col_d1:
                     pdf_data = generate_pdf_report(final_report, "Daily Sales & Payments Report")
-                    st.download_button("📥 تحميل PDF حقيقي", pdf_data, "Daily_Sales_Report.pdf", "application/pdf")
+                    st.download_button("📥 تحميل PDF عريض", pdf_data, "Daily_Sales_Report.pdf", "application/pdf")
                 with col_d2:
                     excel_buffer = io.BytesIO()
                     with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
@@ -523,7 +523,6 @@ elif st.session_state.role == "admin":
             sel_report_id = st.selectbox("اختر رقم التقرير للطباعة والمراجعة:", df_closings['id'].tolist())
             r_data = df_closings[df_closings['id'] == sel_report_id].iloc[0]
             
-            # أزرار تحميل تقرير الإغلاق بكافة الصيغ
             col_b1, col_b2, col_b3 = st.columns(3)
             with col_b1:
                 pdf_cls = generate_pdf_report(pd.DataFrame([r_data]), f"Cashier Closing Report - Branch {r_data['branch']}")
@@ -553,7 +552,6 @@ elif st.session_state.role == "admin":
         df_bal = m_items.reset_index()
         st.dataframe(df_bal, use_container_width=True)
         
-        # أزرار تحميل ميزان المخزون بكافة الصيغ
         cb1, cb2, cb3 = st.columns(3)
         with cb1:
             st.download_button("📥 تحميل الميزان PDF", generate_pdf_report(df_bal, f"Inventory Balance - {r_b}"), f"Balance_{r_b}.pdf", "application/pdf")
@@ -597,7 +595,6 @@ elif st.session_state.role == "admin":
         df_ops = pd.read_sql_query("SELECT * FROM operations_log ORDER BY id DESC", conn)
         st.dataframe(df_ops, use_container_width=True)
         
-        # أزرار تحميل سجل العمليات بكافة الصيغ
         co1, co2, co3 = st.columns(3)
         with co1:
             st.download_button("📥 تحميل السجل PDF", generate_pdf_report(df_ops, "Operations Log"), "Operations_Log.pdf", "application/pdf")
