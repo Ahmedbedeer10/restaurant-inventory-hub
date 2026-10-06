@@ -193,7 +193,7 @@ st.sidebar.markdown(f"**المستخدم:** {st.session_state.name}")
 st.sidebar.markdown(f"**الفرع:** `{st.session_state.branch}`")
 st.sidebar.divider()
 
-# دالة توليد PDF بالوضع العرضي (Landscape) لتظهر كافة الأعمدة بوضوح تام
+# دالة توليد PDF بالوضع العرضي (Landscape)
 def generate_pdf_report(df, title_text):
     pdf_buffer = io.BytesIO()
     doc = SimpleDocTemplate(pdf_buffer, pagesize=landscape(letter), rightMargin=20, leftMargin=20, topMargin=25, bottomMargin=25)
@@ -228,7 +228,7 @@ def generate_pdf_report(df, title_text):
 
 # ----------------- واجهة الكاشير / الفرع -----------------
 if st.session_state.role == "cashier":
-    st.sidebar.markdown("### 🗂️️ القائمة الرئيسية للفرع")
+    st.sidebar.markdown("### 🗂️ القائمة الرئيسية للفرع")
     c_mode = st.sidebar.radio("القسم:", [
         "العمليات والتشغيل اليومي", 
         "🗑️ الهدر والتالف (الإنتاج والمخزون)",
@@ -238,6 +238,7 @@ if st.session_state.role == "cashier":
 
     st.title(f"📍 بوابة الفرع - {st.session_state.name}")
 
+    # 1. العمليات والتشغيل اليومي (متعدد الأصناف مع وحدة متغيرة ديناميكياً)
     if c_mode == "العمليات والتشغيل اليومي":
         st.sidebar.markdown("---")
         st.sidebar.markdown("### ⚙️ نوع الحركة")
@@ -258,15 +259,18 @@ if st.session_state.role == "cashier":
 
         st.markdown(f"#### 📋 تسجيل حركة: `{tab_type}` (أدخل عدة أصناف معاً)")
         if "ops_rows" not in st.session_state:
-            st.session_state.ops_rows = [{"item": list(item_dict.keys())[0], "qty": 1.0, "reason": ""}]
+            st.session_state.ops_rows = [{"item": list(item_dict.keys())[0] if item_dict else "", "qty": 1.0, "reason": ""}]
 
         for idx, row_val in enumerate(st.session_state.ops_rows):
             col_r = st.columns([4, 2, 2, 3, 1])
-            sel_it = col_r[0].selectbox(f"صنف {idx+1}", list(item_dict.keys()), index=list(item_dict.keys()).index(row_val["item"]) if row_val["item"] in item_dict else 0, key=f"op_it_{idx}")
+            sel_it = col_r[0].selectbox(f"صنف {idx+1}", list(item_dict.keys()) if item_dict else ["لا توجد أصناف"], index=list(item_dict.keys()).index(row_val["item"]) if row_val["item"] in item_dict else 0, key=f"op_it_{idx}")
             row_val["item"] = sel_it
             row_val["qty"] = col_r[1].number_input(f"كمية {idx+1}", min_value=0.1, step=0.5, value=row_val["qty"], key=f"op_q_{idx}")
-            unit_fixed = item_dict[sel_it][2]
-            col_r[2].text_input(f"وحدة {idx+1}", value=str(unit_fixed), disabled=True, key=f"op_u_{idx}")
+            
+            # جلب وتحديث وحدة الصنف ديناميكياً
+            unit_dynamic = item_dict[sel_it][2] if sel_it in item_dict else "pcs"
+            col_r[2].text_input(f"وحدة {idx+1}", value=str(unit_dynamic), disabled=True, key=f"op_u_{idx}")
+            
             row_val["reason"] = col_r[3].text_input(f"سبب {idx+1}", value=row_val["reason"], placeholder="ملاحظة", key=f"op_r_{idx}")
             if col_r[4].button("❌", key=f"del_op_{idx}"):
                 if len(st.session_state.ops_rows) > 1:
@@ -274,46 +278,68 @@ if st.session_state.role == "cashier":
                     st.rerun()
 
         if st.button("➕ إضافة سطر صنف آخر"):
-            st.session_state.ops_rows.append({"item": list(item_dict.keys())[0], "qty": 1.0, "reason": ""})
+            st.session_state.ops_rows.append({"item": list(item_dict.keys())[0] if item_dict else "", "qty": 1.0, "reason": ""})
             st.rerun()
 
         if st.button("💾 حفظ كافة العمليات المسجلة في النظام", type="primary", use_container_width=True):
             for r in st.session_state.ops_rows:
-                s_sku, s_name, s_unit = item_dict[r["item"]]
-                cursor.execute("""
-                INSERT INTO operations_log (entry_type, branch, to_branch, entry_date, item_type, item_sku, item_name, quantity, unit, reason, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (tab_type, st.session_state.branch, to_br, str(op_date), target_source, s_sku, s_name, r["qty"], str(s_unit), r["reason"], st.session_state.user))
+                if r["item"] in item_dict:
+                    s_sku, s_name, s_unit = item_dict[r["item"]]
+                    cursor.execute("""
+                    INSERT INTO operations_log (entry_type, branch, to_branch, entry_date, item_type, item_sku, item_name, quantity, unit, reason, created_by)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (tab_type, st.session_state.branch, to_br, str(op_date), target_source, s_sku, s_name, r["qty"], str(s_unit), r["reason"], st.session_state.user))
             conn.commit()
             st.success(f"تم حفظ الحركات بنجاح!")
-            st.session_state.ops_rows = [{"item": list(item_dict.keys())[0], "qty": 1.0, "reason": ""}]
+            st.session_state.ops_rows = [{"item": list(item_dict.keys())[0] if item_dict else "", "qty": 1.0, "reason": ""}]
 
+    # 2. الهدر والتالف (متعدد الأصناف وبوحدات متغيرة ديناميكياً)
     elif c_mode == "🗑️ الهدر والتالف (الإنتاج والمخزون)":
-        st.subheader("🗑️ تسجيل الهدر والتالف اليومي (منتجات نهائية أو خامات مخزن)")
+        st.subheader("🗑️ تسجيل الهدر والتالف اليومي (متعدد الأصناف)")
         waste_target = st.radio("حدد نوع التالف/الهدر:", ["هدر إنتاج (منتجات نهائية)", "هدر خامات مخزن"], horizontal=True)
         w_source = "production" if "إنتاج" in waste_target else "inventory"
         
         df_w_items = pd.read_sql_query("SELECT sku, name_ar, storage_unit FROM items_master WHERE item_type=? ORDER BY name_ar ASC", conn, params=(w_source,))
         w_item_dict = {f"{r['name_ar']} ({r['sku']})": (r['sku'], r['name_ar'], r['storage_unit']) for _, r in df_w_items.iterrows()}
         
-        with st.form("waste_form"):
-            w_date = st.date_input("تاريخ الهدر:", value=date.today())
-            selected_w_item = st.selectbox("اختر الصنف التالف:", list(w_item_dict.keys()) if w_item_dict else ["لا توجد أصناف"])
-            w_qty = st.number_input("الكمية التالفة:", min_value=0.1, step=0.5, value=1.0)
-            w_reason = st.text_input("سبب التالف / الهدر (إجباري):", placeholder="مثال: احتراق أثناء الشوي / انتهاء صلاحية")
+        w_date = st.date_input("تاريخ الهدر:", value=date.today())
+        
+        if "waste_rows" not in st.session_state:
+            st.session_state.waste_rows = [{"item": list(w_item_dict.keys())[0] if w_item_dict else "", "qty": 1.0, "reason": ""}]
+
+        st.markdown("#### 📋 جدول الأصناف التالفة:")
+        for idx, w_row in enumerate(st.session_state.waste_rows):
+            col_w = st.columns([4, 2, 2, 3, 1])
+            sel_w_it = col_w[0].selectbox(f"صنف هدر {idx+1}", list(w_item_dict.keys()) if w_item_dict else ["لا توجد أصناف"], index=list(w_item_dict.keys()).index(w_row["item"]) if w_row["item"] in w_item_dict else 0, key=f"w_it_{idx}")
+            w_row["item"] = sel_w_it
+            w_row["qty"] = col_w[1].number_input(f"كمية هدر {idx+1}", min_value=0.1, step=0.5, value=w_row["qty"], key=f"w_q_{idx}")
             
-            if st.form_submit_button("💾 تسجيل وترحيل الهدر والتالف للنظام", type="primary", use_container_width=True):
-                if selected_w_item and selected_w_item != "لا توجد أصناف":
-                    sk_w, nm_w, u_w = w_item_dict[selected_w_item]
+            unit_w_dynamic = w_item_dict[sel_w_it][2] if sel_w_it in w_item_dict else "pcs"
+            col_w[2].text_input(f"وحدة هدر {idx+1}", value=str(unit_w_dynamic), disabled=True, key=f"w_u_{idx}")
+            
+            w_row["reason"] = col_w[3].text_input(f"سبب {idx+1}", value=w_row["reason"], placeholder="سبب الهدر (إجباري)", key=f"w_r_{idx}")
+            if col_w[4].button("❌", key=f"del_w_{idx}"):
+                if len(st.session_state.waste_rows) > 1:
+                    st.session_state.waste_rows.pop(idx)
+                    st.rerun()
+
+        if st.button("➕ إضافة صنف تالف آخر"):
+            st.session_state.waste_rows.append({"item": list(w_item_dict.keys())[0] if w_item_dict else "", "qty": 1.0, "reason": ""})
+            st.rerun()
+
+        if st.button("💾 حفظ وترحيل كافة أصناف الهدر والتالف", type="primary", use_container_width=True):
+            for wr in st.session_state.waste_rows:
+                if wr["item"] in w_item_dict and wr["reason"].strip():
+                    sk_w, nm_w, u_w = w_item_dict[wr["item"]]
                     cursor.execute("""
                     INSERT INTO operations_log (entry_type, branch, to_branch, entry_date, item_type, item_sku, item_name, quantity, unit, reason, created_by)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, ("الهدر والتالف", st.session_state.branch, "-", str(w_date), w_source, sk_w, nm_w, w_qty, str(u_w), w_reason, st.session_state.user))
-                    conn.commit()
-                    st.success(f"تم تسجيل هدر التالف للصنف ({nm_w}) بكمية {w_qty} بنجاح!")
-                else:
-                    st.warning("يرجى اختيار صنف صحيح!")
+                    """, ("الهدر والتالف", st.session_state.branch, "-", str(w_date), w_source, sk_w, nm_w, wr["qty"], str(u_w), wr["reason"], st.session_state.user))
+            conn.commit()
+            st.success("تم تسجيل وترحيل كافة بنود الهدر والتالف بنجاح!")
+            st.session_state.waste_rows = [{"item": list(w_item_dict.keys())[0] if w_item_dict else "", "qty": 1.0, "reason": ""}]
 
+    # 3. تقرير الإغلاق المالي
     elif c_mode == "📝 تقرير الإغلاق المالي":
         st.subheader("📝 تقرير الإيرادات والمبيعات اليومية المستلمة (Daily Closing Sheet)")
         with st.form("cashier_closing_form"):
@@ -342,23 +368,52 @@ if st.session_state.role == "cashier":
                 """, (st.session_state.branch, str(cl_date), c_name, c_cash, c_mada, c_visa, c_master, c_trans, c_hunger, c_jahez, c_ninja, c_keeta, c_exp_note, c_exp_amt, c_total, st.session_state.user))
                 conn.commit()
                 st.success("تم إرسال تقرير الإغلاق المالي بنجاح إلى الإدارة والمحاسب!")
+
+    # 4. الجرد الدوري (متعدد الأصناف في جدول واحد منظم)
     else:
-        st.subheader("📋 الجرد الدوري الفعلي للمخزون")
+        st.subheader("📋 الجرد الدوري الفعلي للمخزون (إدخال عدة أصناف معاً)")
         df_inv = pd.read_sql_query("SELECT sku, name_ar, storage_unit, ingredient_unit FROM items_master WHERE item_type='inventory' ORDER BY name_ar ASC", conn)
         cnt_map = {f"{r['name_ar']} ({r['sku']})": (r['sku'], r['name_ar'], r['storage_unit'], r['ingredient_unit']) for _, r in df_inv.iterrows()}
-        ca, cb = st.columns(2)
-        with ca:
-            cnt_d = st.date_input("تاريخ الجرد:", value=date.today())
-            sel_cnt = st.selectbox("الصنف:", list(cnt_map.keys()))
-            cnt_id = st.text_input("معرف الجرد في فودكس:", placeholder="اختياري")
-        with cb:
-            sk_c, nm_c, u_st, u_in = cnt_map[sel_cnt]
-            q_st = st.number_input(f"كمية التخزين ({u_st}):", min_value=0.0, step=1.0)
-            q_in = st.number_input(f"كمية المكونات ({u_in}):", min_value=0.0, step=1.0)
-        if st.button("حفظ الجرد للصنف", type="primary"):
-            cursor.execute("INSERT INTO inventory_counts (branch, count_date, count_id, item_sku, item_name, storage_qty, ingredients_qty, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (st.session_state.branch, str(cnt_d), cnt_id.strip(), sk_c, nm_c, q_st, q_in, st.session_state.user))
+        
+        c_cnt1, c_cnt2 = st.columns(2)
+        with c_cnt1: cnt_d = st.date_input("تاريخ الجرد:", value=date.today())
+        with c_cnt2: cnt_id = st.text_input("معرف الجرد في فودكس (اختياري):", placeholder="رقم الجرد")
+
+        if "count_rows" not in st.session_state:
+            st.session_state.count_rows = [{"item": list(cnt_map.keys())[0] if cnt_map else "", "q_st": 0.0, "q_in": 0.0}]
+
+        st.markdown("#### 📦 جدول جرد الأصناف:")
+        for idx, c_row in enumerate(st.session_state.count_rows):
+            col_c = st.columns([4, 2, 2, 1])
+            sel_c_it = col_c[0].selectbox(f"صنف جرد {idx+1}", list(cnt_map.keys()) if cnt_map else ["لا توجد أصناف"], index=list(cnt_map.keys()).index(c_row["item"]) if c_row["item"] in cnt_map else 0, key=f"c_it_{idx}")
+            c_row["item"] = sel_c_it
+            
+            u_st_dyn = cnt_map[sel_c_it][2] if sel_c_it in cnt_map else "pcs"
+            u_in_dyn = cnt_map[sel_c_it][3] if sel_c_it in cnt_map else "pcs"
+            
+            c_row["q_st"] = col_c[1].number_input(f"تخزين ({u_st_dyn}) {idx+1}", min_value=0.0, step=1.0, value=c_row["q_st"], key=f"c_qst_{idx}")
+            c_row["q_in"] = col_c[2].number_input(f"مكونات ({u_in_dyn}) {idx+1}", min_value=0.0, step=1.0, value=c_row["q_in"], key=f"c_qin_{idx}")
+            
+            if col_c[3].button("❌", key=f"del_c_{idx}"):
+                if len(st.session_state.count_rows) > 1:
+                    st.session_state.count_rows.pop(idx)
+                    st.rerun()
+
+        if st.button("➕ إضافة صنف آخر للجرد"):
+            st.session_state.count_rows.append({"item": list(cnt_map.keys())[0] if cnt_map else "", "q_st": 0.0, "q_in": 0.0})
+            st.rerun()
+
+        if st.button("💾 حفظ وترحيل كافة أصناف الجرد للنظام", type="primary", use_container_width=True):
+            for cr in st.session_state.count_rows:
+                if cr["item"] in cnt_map:
+                    sk_c, nm_c, _, _ = cnt_map[cr["item"]]
+                    cursor.execute("""
+                        INSERT INTO inventory_counts (branch, count_date, count_id, item_sku, item_name, storage_qty, ingredients_qty, created_by)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (st.session_state.branch, str(cnt_d), cnt_id.strip(), sk_c, nm_c, cr["q_st"], cr["q_in"], st.session_state.user))
             conn.commit()
-            st.success("تم حفظ الجرد بنجاح!")
+            st.success("تم حفظ وترحيل كافة بنود الجرد بنجاح!")
+            st.session_state.count_rows = [{"item": list(cnt_map.keys())[0] if cnt_map else "", "q_st": 0.0, "q_in": 0.0}]
 
 # ----------------- واجهة الإدارة والمحاسب -----------------
 elif st.session_state.role == "admin":
@@ -445,7 +500,6 @@ elif st.session_state.role == "admin":
                 st.success("✨ تم تحليل ملف المدفوعات وتوليد التقرير بنجاح مطابَقاً لنموذج الـ PDF!")
                 st.dataframe(final_report.style.format({c: "{:,.2f}" for c in final_report.columns if c != 'Branch Name'}), use_container_width=True)
                 
-                # أزرار التحميل بكافة الصيغ المطلوبة (PDF Landscape, Excel, CSV)
                 col_d1, col_d2, col_d3 = st.columns(3)
                 with col_d1:
                     pdf_data = generate_pdf_report(final_report, "Daily Sales & Payments Report")
@@ -475,15 +529,18 @@ elif st.session_state.role == "admin":
         with h4: inv_date = st.date_input("التاريخ:", value=date.today())
 
         if "pur_rows" not in st.session_state:
-            st.session_state.pur_rows = [{"item": list(inv_item_dict.keys())[0], "qty": 1.0, "price": 10.0}]
+            st.session_state.pur_rows = [{"item": list(inv_item_dict.keys())[0] if inv_item_dict else "", "qty": 1.0, "price": 10.0}]
 
         grand_total = 0.0
         for p_idx, p_row in enumerate(st.session_state.pur_rows):
             col_p = st.columns([4, 2, 2, 2, 2, 1])
-            p_sel = col_p[0].selectbox(f"صنف {p_idx+1}", list(inv_item_dict.keys()), key=f"pur_it_{p_idx}")
+            p_sel = col_p[0].selectbox(f"صنف {p_idx+1}", list(inv_item_dict.keys()) if inv_item_dict else ["لا توجد أصناف"], key=f"pur_it_{p_idx}")
             p_row["item"] = p_sel
             p_row["qty"] = col_p[1].number_input(f"كمية {p_idx+1}", min_value=0.1, step=1.0, value=p_row["qty"], key=f"pur_q_{p_idx}")
-            col_p[2].text_input(f"وحدة {p_idx+1}", value=inv_item_dict[p_sel][2], disabled=True, key=f"pur_u_{p_idx}")
+            
+            unit_p_dyn = inv_item_dict[p_sel][2] if p_sel in inv_item_dict else "pcs"
+            col_p[2].text_input(f"وحدة {p_idx+1}", value=unit_p_dyn, disabled=True, key=f"pur_u_{p_idx}")
+            
             p_row["price"] = col_p[3].number_input(f"سعر {p_idx+1}", min_value=0.0, step=0.5, value=p_row["price"], key=f"pur_p_{p_idx}")
             row_tot = (p_row["qty"] * p_row["price"]) * 1.15
             grand_total += row_tot
@@ -494,19 +551,20 @@ elif st.session_state.role == "admin":
                     st.rerun()
 
         if st.button("➕ إضافة صنف آخر"):
-            st.session_state.pur_rows.append({"item": list(inv_item_dict.keys())[0], "qty": 1.0, "price": 10.0})
+            st.session_state.pur_rows.append({"item": list(inv_item_dict.keys())[0] if inv_item_dict else "", "qty": 1.0, "price": 10.0})
             st.rerun()
 
         st.metric("الإجمالي شامل الضريبة", f"{grand_total:,.2f} SAR")
         if st.button("💾 حفظ الفاتورة", type="primary", use_container_width=True):
             if inv_number.strip():
                 for pr in st.session_state.pur_rows:
-                    p_sku, p_name, _ = inv_item_dict[pr["item"]]
-                    tot_r = (pr["qty"] * pr["price"]) * 1.15
-                    cursor.execute("INSERT INTO purchases_log (invoice_number, supplier_name, branch, invoice_date, item_sku, item_name, quantity, cost_per_unit, tax_percent, total_with_tax, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (inv_number.strip(), inv_supplier, inv_branch, str(inv_date), p_sku, p_name, pr["qty"], pr["price"], 15.0, tot_r, st.session_state.user))
+                    if pr["item"] in inv_item_dict:
+                        p_sku, p_name, _ = inv_item_dict[pr["item"]]
+                        tot_r = (pr["qty"] * pr["price"]) * 1.15
+                        cursor.execute("INSERT INTO purchases_log (invoice_number, supplier_name, branch, invoice_date, item_sku, item_name, quantity, cost_per_unit, tax_percent, total_with_tax, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (inv_number.strip(), inv_supplier, inv_branch, str(inv_date), p_sku, p_name, pr["qty"], pr["price"], 15.0, tot_r, st.session_state.user))
                 conn.commit()
                 st.success("تم حفظ الفاتورة بنجاح!")
-                st.session_state.pur_rows = [{"item": list(inv_item_dict.keys())[0], "qty": 1.0, "price": 10.0}]
+                st.session_state.pur_rows = [{"item": list(inv_item_dict.keys())[0] if inv_item_dict else "", "qty": 1.0, "price": 10.0}]
 
     elif admin_section == "📑 تقارير إغلاق الكاشيرات والطباعة":
         st.subheader("📑 تقارير إغلاق الكاشيرات ومطابقة الدفاتر")
