@@ -1,0 +1,195 @@
+﻿id,name,sku,storage_unit,ingredient_unit,storage_to_ingredient_factor,cost,minimum_level,par_level,maximum_level,category_reference,barcode,name_localized
+a2cec356-f485-45cc-bf41-e93c99d85ca0,كبدة,st-0001,pcs,gm,500,,,,,cat-002,,Liver
+a2cec356-f726-4bc2-a0bb-c8d608e5979c,صدور فراخ فيليه(450gm),st-0002,pcs,gm,450,,,,,cat-002,,Chicken Breast out inner Fillet (4.2x5 KG)
+a2cec356-fd3c-47ec-82be-b6dadcb90447,خروف,st-0003,Nos,pcs,1,,,,,cat-002,,Herfey
+a2cec357-0062-49ff-92e6-0ff5ccdd80ae,لحم حاشي,st-0004,kg,gm,1000,27,,,,cat-002,,Camel meat
+a2cec357-0672-4fa0-b5dc-fda33ea0c502,لحم بقري (20 حبة × 400 جرام في الدقيقة),st-0005,pcs,gm,400,,,,,cat-002,,Beef (20nos x400grm)
+a2cec357-0d1d-4595-8fad-71380b89890b,لحم الماعز,st-0006,Nos,People,16,,,,,cat-002,,Goat Meat
+a2cec357-0fd2-431b-bac9-a5f734500ea1,دجاج 800,st-0007,pcs,pcs,1,,,,,cat-002,,Chicken 800
+a2cec357-161f-404d-afb4-d1e9cc860d33,كورسان(1ctn=10kg),st-0008,Kg,gm,1000,,,,,cat-003,,Kursan(1ctn=10kg)
+a2cec357-1cd5-48ae-bc13-64bdc1325fa5,شوفان(1ctn=24pcs=400gm),st-0009,kg,gm,1000,,,,,cat-003,,OATS(1ctn=24pcs=400gm)
+a2cec357-1f93-4010-a901-b39ac50f4ab2,فول مجروش 18 كجم,st-0010,kg,gm,1000,,,,,cat-003,,Crushed Fava Beans 18 kg
+a2cec357-25b1-4a04-a4ee-884d22ec5fd7,أرز ماندى وحنيذ(1bag*40kg),st-0011,Kg,gm,40000,,,,,cat-003,,Rice omaco(1bag*40kg)
+a2cec357-2c6e-4f1f-bf4f-0ffda53583cd,أرزشعبي وبشاور ومضغوط(1bag*40kg),st-0012,Kg,gm,40000,,,,,cat-003,,Shaabhi (carptal)(1bag*40kg)
+a2cec357-2f35-447f-8f1c-695111fec885,أرز سليق(1bag*40kg),st-0013,Kg,gm,40000,,,,,cat-003,,Rice Bashawer ( king Rice )(1bag*40kg)
+a2cec357-3537-4c55-9a80-91ad21fc5394,الزبيب المجفف (العنب المجفف)(1ctn*10kg),st-0014,kg,gm,10000,,,,,cat-003,,Dry Raisins (dry grapes)(1ctn*10kg)
+a2cec357-3c1b-47f1-98d9-800bac9662bb,معكرونة سباغيتي(1ctn*20pcs*400gm),st-0015,pcs,gm,400,,,,,cat-003,,Spaghetti Pasta
+a2cec357-3eb8-4bb7-b7f1-4ef19c65f6ba,عدس أحمر ماسور,st-0016,Kg,gm,15000,,,,,cat-003,,Red Lentils Masoor
+a2cec357-44d9-4a35-994f-f9a07366ad37,جريش,st-0017,Kg,gm,1000,,,,,cat-003,,Jareesh
+a2cec357-4bd5-422c-a602-89d3c23a6526,فاصوليا,st-0018,Kg,gm,1000,,,,,cat-004,,Beans
+a2cec357-4fbf-466b-9fd4-02eae080d28f,فلفل داكوس,st-0019,kg,gm,1000,,,,,cat-004,,Daqoos pepper
+a2cec357-548c-41b4-ae9a-a9b0fe58555a,الفلفل الأخضر الحلو,st-0020,kg,gm,1000,,,,,cat-004,,GREEN BELL PEPPER
+a2cec357-5b4b-47d9-8ae9-ed64d90c2502,كوسة,st-0021,Kg,gm,1000,,,,,cat-004,,Cucurbita pepo
+a2cec357-5e68-436b-8ee9-492029c6de20,فلفل حلو,st-0022,Kg,gm,1000,,,,,cat-004,,bell pepper
+a2cec357-6401-40b8-bcfc-11ab9da06aae,بَقدونس,st-0023,Kg,gm,1000,,,,,cat-004,,Parsley
+a2cec357-6af2-4800-86d8-886e94dfd9da,النعناع,st-0024,Bag,pcs,25,,,,,cat-004,,Mint
+a2cec357-6dc4-49c5-b89a-7428a08ffa3e,الشبت,st-0025,Bag,pcs,25,,,,,cat-004,,dill
+a2cec357-73a6-4822-932a-6ae9a92ee325,الليمون,st-0026,Kg,gm,1000,,,,,cat-004,,Lemons
+a2cec357-7a80-4d8a-acce-0580d2f65981,ثوم,st-0027,Kg,gm,1000,,,,,cat-004,,Garlic
+a2cec357-7d32-4174-b614-3ca48c71e094,باذنجان,st-0028,Kg,gm,1000,,,,,cat-004,,Eggplant
+a2cec357-8370-4c47-b7ee-d9fbbb83f962,البطاطس,st-0029,Kg,gm,1000,,,,,cat-004,,Potatoes
+a2cec357-8a23-4ff9-a9e9-2cc0e9ebcbfd,البصل الأحمر,st-0030,Kg,gm,1000,,,,,cat-004,,Red onions
+a2cec357-8cd9-40fc-86aa-ed6432714d8a,البصل الأبيض,st-0031,Kg,gm,1000,,,,,cat-004,,White onions
+a2cec357-92e4-4426-abb8-a427408380d4,اليقطين,st-0032,Kg,gm,1000,,,,,cat-004,,pumpkin
+a2cec357-99bf-48ba-9646-846e57521a94,خيار,st-0033,Kg,gm,1000,,,,,cat-004,,Cucumbers
+a2cec357-9c83-4e5b-8573-b042d7638b93,كسبرة,st-0034,Kg,gm,1000,,,,,cat-004,,Coriander
+a2cec357-a276-44ed-a50e-21f02ec63175,الفلفل الأخضر,st-0035,Kg,gm,1000,,,,,cat-004,,Green peppers
+a2cec357-a868-4dcd-a876-6f7123fda763,الفلفل الأحمر,st-0036,Kg,gm,1000,,,,,cat-004,,Red peppers
+a2cec357-ab1d-4898-96d1-d53e4a722d2b,جزر,st-0037,Kg,gm,1000,,,,,cat-004,,Carrots
+a2cec357-b200-4799-ae92-ab5118e04566,خس,st-0038,Kg,gm,1000,,,,,cat-004,,Lettuce
+a2cec357-b806-4741-9ce9-c76a960f366f,الطماطم,st-0039,Kg,gm,1000,,,,,cat-004,,Tomatoes
+a2cec357-bac7-4fd2-a1f3-b6f6c110ab80,ملوكيا مجمدة (1ctn*20pkt*400gm),st-0040,pcs,gm,400,,,,,cat-005,,Frozen  Molokhia (1ctn*20pkt*400gm)
+a2cec357-c0e8-425e-8dbb-5e171c91114f,خضراوات مشكلة مجمدة (1ctn*20pkt*400gm),st-0041,pcs,gm,400,,,,,cat-005,,Frozen Mixed Veg (1ctn*20pkt*400gm)
+a2cec357-c7a3-42e1-a2ec-fb045e7be9fa,بامية مجمدة(1ctn*20pkt*400gm),st-0042,pcs,gm,400,,,,,cat-005,,Frozen Okra (1ctn*20pkt*400gm)
+a2cec357-ca81-45f9-9942-5dd6f47497fd,مسحوق الزنجبيل,st-0043,Kg,gm,1000,,,,,cat-006,,Ginger Powder
+a2cec357-d07e-4f70-9af2-baa30d145614,بهارات مطحونة,st-0044,Kg,gm,1000,,,,,cat-006,,Ground Mixed Spices
+a2cec357-d73c-4ace-b6f1-f6848c0171fc,زنجبيل,st-0045,Kg,gm,1000,,,,,cat-006,,Ginger
+a2cec357-d9d9-41f3-8b9e-2d5395320bca,الهيل الأخضر (كيس واحد * 1 كجم),st-0046,Kg,gm,1000,,,,,cat-006,,GREEN CARDAMOM (1 BAG *1 KG)
+a2cec357-dfee-43cd-91a5-ac99769ebcff,أوراق الغار,st-0047,Kg,gm,1000,,,,,cat-006,,Bay Leaves
+a2cec357-e26c-4d67-8ed3-8d042a02d56e,مسحوق البابريكا الحارة,st-0048,Kg,gm,1000,,,,,cat-006,,Hot Paprika Powder
+a2cec357-e8c2-4a17-8bcb-4a7ccc7fe17c,مسحوق الفلفل الأبيض,st-0049,Kg,gm,1000,,,,,cat-006,,White Pepper Powder
+a2cec357-eeb7-4d88-ae0b-7506ec6d7d42,مسحوق الكركم,st-0050,Kg,gm,1000,15,,,,cat-006,,Turmeric Powder
+a2cec357-f16f-44df-9c10-f451f8f87fc9,مسحوق البابريكا الحلوة,st-0051,Kg,gm,1000,,,,,cat-006,,Sweet Paprika Powder
+a2cec357-f8b8-4b9f-ac80-c3e12c34fd28,ملح ناعم,st-0052,Kg,gm,1000,3.75,,,,cat-006,,fine salt
+a2cec358-002f-4b05-a49a-d618b6bdf3d8,ملح خشن,st-0053,Kg,gm,1000,,,,,cat-006,,coarse salt
+a2cec358-0730-459b-96d3-5e97fbf78099,مسحوق الفلفل الأحمر,st-0054,Kg,gm,1000,,,,,cat-006,,Red Chilli Powder
+a2cec358-09e0-4322-8023-168acf3a348e,مسحوق لون صفار البيض(1*80*100GM),st-0055,pcs,gm,100,,,,,cat-006,,Egg Yolk Color Powder(1*80*100GM)
+a2cec358-0fd6-4c80-9f8f-6d3f72092758,مسحوق الكاري مهران(1ctn*36pcs*400gm),st-0056,pcs,gm,400,,,,,cat-006,,Curry Powder Mehran(1ctn*36pcs*400gm)
+a2cec358-16d6-4d87-b2bd-8f2b06ee1e8d,بذور الكزبرة,st-0057,Kg,gm,1000,,,,,cat-006,,Coriander Seed
+a2cec358-19a0-4847-87d4-44f499a2c0de,مسحوق الكزبرة,st-0058,Kg,gm,1000,,,,,cat-006,,Coriander Powder
+a2cec358-1f75-467f-9ac5-5caa8c04d439,بذور القرنفل,st-0059,Kg,gm,1000,,,,,cat-006,,Clove Seed
+a2cec358-2669-42c2-9440-a5a306a068ff,مسحوق القرنفل,st-0060,Kg,gm,1000,,,,,cat-006,,Clove Powder
+a2cec358-2927-4922-9668-94ab8695e145,عصا القرفة,st-0061,Kg,gm,1000,,,,,cat-006,,Cinnamon Stick
+a2cec358-2f29-4b66-91f0-7440b760807c,مسحوق القرفة,st-0062,Kg,gm,1000,,,,,cat-006,,Cinnamon Powder
+a2cec358-3608-444d-bdfa-d397f9c3066d,مرق دجاج 18*30*18,st-0063,pcs,gm,18,,,,,cat-006,,Chicken Stock 18*30*18
+a2cec358-38a9-426e-a968-98ab10fbba82,بذور الكمون,st-0064,Kg,gm,1000,,,,,cat-006,,Cumin Seed
+a2cec358-3ec0-42c7-82ce-2eb6d64403e7,مسحوق الكمون,st-0065,Kg,gm,1000,,,,,cat-006,,Cumin Powder
+a2cec358-4554-4e36-b4d9-77fe63391d86,مسحوق الهيل,st-0066,Kg,gm,1000,,,,,cat-006,,Cardamom Powder
+a2cec358-47ed-4d27-bbf4-01354161eb0b,بذور الفلفل الأسود,st-0067,Kg,gm,1000,,,,,cat-006,,Black Pepper Seed
+a2cec358-4e4f-4988-9dfb-d6d59e008341,مسحوق الفلفل الأسود,st-0068,Kg,gm,1000,,,,,cat-006,,Black Pepper Powder
+a2cec358-5449-43ff-8e84-0ab32e7208c7,الليمون الأسود المجفف,st-0069,Kg,gm,1000,,,,,cat-006,,Black Lemon Dried
+a2cec358-56fc-42a4-8e1c-48d660c1c224,طحينة الجميل(1galon=10liter),st-0070,liter,ml,10000,,,,,cat-006,,Aljameel Tahini(1galon=10liter)
+a2cec358-5d17-4d6f-9874-acffa6ee4230,موتو(1ctn*20pcs*454gm),st-0071,pcs,gm,454,,,,,cat-006,,AJI.N.MOTO(1ctn*20pcs*454gm)
+a2cec358-63e4-4107-94d2-707ade433bce,"زيتون أسود  شرائح، 3000 غرام",st-0072,kg,gm,1000,,,,,cat-007,,SLICED BLACK OLIVES 3000 GM
+a2cec358-667b-423a-ac3e-45d52d2c3a04,زيت زيتون الجميل (علبة واحدة * 10 لتر),st-0073,liter,Ml,10000,,,,,cat-007,,OLIVE OIL AL JAMEEL (1 TIN*10 LTR)
+a2cec358-6cd4-4b14-a656-4b3ac712ad5c,زبدة المارعي 25 كجم,st-0074,kg,gm,25000,,,,,cat-007,,Almariai Butter 25 KG
+a2cec358-7380-428e-b4d1-de2fd9b61d65,زيت (1galon=17liter),st-0075,liter,ml,1000,,,,,cat-007,,Oil (1galon=17liter)
+a2cec358-7645-45d4-b9b6-ecebef20feb7,سمن الشوكة والسكين,st-0076,Kg,gm,900,,,,,cat-007,,Fork & Knife Ghee
+a2cec358-7c4d-49c3-ac63-e0a75c3c7b55,سمن المزرعة,st-0077,Kg,gm,1000,,,,,cat-007,,Farm Ghee
+a2cec358-82cd-4b1d-9617-3d12331248eb,سمن القمرية النباتي حجم كبير,st-0078,kg,gm,1000,,,,,cat-007,,Al Kamaria Vegtable GHEE Big Size
+a2cec358-8583-40af-acc2-1762d29091bd,كريمة طبخ(1ctn*48pcs*170gm),st-0079,pcs,gm,170,,,,,cat-008,,Long life cream ((1ctn*48pcs*170gm))
+a2cec358-8bfe-4133-9d50-6d222d068950,جبنة فيتا (1ctn*18pcs*400gm),st-0080,pcs,gm,400,,,,,cat-008,,Cheese Feta 400Gm
+a2cec358-8e96-414a-9e7f-608a4a12f366,لبن بودرة(6×2.25kg),st-0081,pcs,gm,2250,,,,,cat-008,,MILK Powder (6X2.25 KG)
+a2cec358-94bb-4ac1-a0b1-cdbfc02593af,زبادي 170 غرام (1*60 قطعة),st-0082,pcs,pcs,1,,,,,cat-008,,Yogert 170 grm (1*60pcs)
+a2cec358-9ba5-4e65-a2be-dd5ee3c0ad85,لبن 1 لتر (1*12 قطعة),st-0083,pcs,ml,1000,,,,,cat-008,,Laban 1 LITER(1*12pcs )
+a2cec358-9e5d-4cf4-b947-d86d83f8de57,حليب مكثف(1ctn*36pcs),st-0084,pcs,Ml,6120,,,,,cat-008,,CONDNSED MILK (1*36pcs *170ML =6120)
+a2cec358-a460-478d-a432-103d567853a9,وزن كريمة الجبن القابلة للدهن,st-0085,pcs,gm,1100,,,,,cat-008,,Cream Cheese Spread Weight
+a2cec358-ab3f-4115-bba8-eff223255f59,لبن المراعي 2 لتر,st-0086,pcs,Ml,2000,,,,,cat-008,,Laban  2 Liters
+a2cec358-ade3-4709-a3af-8f35b8ee7303,زبادي المراعي,st-0087,Kg,gm,1000,,,,,cat-008,,Almarai yogurt
+a2cec358-b3f0-43fe-8fa6-58bdcfad9f1a,حليب المراعي 1 لتر(1ctn*12pcs),st-0088,pcs,Ml,12000,,,,,cat-008,,Pasture Milk 1 Liter(1ctn*12pcs)
+a2cec358-b9d8-4f1c-bfee-bcbb7c05b09e,(1ctn*72pcs)لبن المراعي180مل,st-0089,pcs,pcs,1,,,,,cat-008,,Laban  Almarai180ml (1ctn*72pcs)
+a2cec358-bca5-439b-a67e-3f04494c361b,لبن قارية230 مل(1ctn*40pcs),st-0090,pcs,pcs,1,,,,,cat-008,,Laban Qariya230 Ml(1ctn*40pcs)
+a2cec358-c2ae-4046-86f2-c7a23195a4aa,بيض,st-0091,pcs,pcs,1,,,,,cat-008,,Egg
+a2cec358-c97a-4544-86f1-a1b307f69a46,نشا(1X25 KG),st-0092,pcs,gm,1000,,,,,cat-009,,Corn Starch AMC (1X25 KG)
+a2cec358-cc3b-496d-a724-4f549a8eb10b,دقيق أبيض(10X1 Kg),st-0093,pcs,gm,1000,,,,,cat-009,,White Flour Kuwait (10X1 Kg)
+a2cec358-d244-49d4-9a92-6566ca88da6f,بيكنج بودر(24X450 GM),st-0094,pcs,gm,450,,,,,cat-009,,Baking Powder Foster Clark (24X450 GM)
+a2cec358-d4cb-44e9-95f5-28e12d378983,سمبوسة (1Boxx8pkt x 500 gm ),st-0095,pkt,gm,500,,,,,cat-009,,Sambosa ( 1 Boxx8pkt x 500 gm )
+a2cec358-db0e-4b34-8251-035017285f1f,مسحوق دقيق مختلط,st-0096,Kg,gm,1000,,,,,cat-009,,Flour Mixed Powder
+a2cec358-e1d0-48a6-b59b-cf63bdb4f1bc,خبز,st-0097,pcs,pcs,1,,,,,cat-009,,Bread
+a2cec358-e488-47f6-9b4f-55006f776bd4,معجون طماطم صغير(1ctn*24pcs*400gm),st-0098,pcs,gm,400,35.33,,,,cat-010,,Toamato Paste Small 400 g
+a2cec358-ec76-411b-a577-48e1ee9a160c,معجون طماطم رانا صغير (1 × 12 برطمان × 830 غرام),st-0099,pcs,gm,830,,,,,cat-010,,Rana Tomato Paste Small(1*12 Jar *830grm)
+a2cec358-f164-4505-8002-c4f3f069e442,صلصة رانا الحارة (1ctn*36pcs*88gm ),st-0100,pcs,pcs,1,,,,,cat-010,,Rana Hot Sauce (1ctn*36pcs*88gm )
+a2cec359-02b0-4017-a37c-70a95126a248,معجون طماطم رنا كبير(1ctn*6pcs*4.450kg),st-0101,pcs,gm,4450,,,,,cat-010,,Rana Tomato Paste Big (1ctn*6pcs*4.450kg)
+a2cec359-07eb-49ca-bf54-3ea5e7c796c0,كريم كراميل فر ن,st-0102,pcs,Pcs,1,,,,,cat-011,,Cream Carmel Oven-baked
+a2cec359-0aa4-4bc4-a839-ab663fd95b9d,مسحوق الفانيليا الأخضر (1ctn*6pkt*20psc=3gm),st-0103,pkt,pcs,20,,,,,cat-011,,Vanilla powder  Green (6*60 Gm)
+a2cec359-10f7-4ecb-8e03-d7404040ccad,مسحوق كراميل أخضر(1ctn=12pkt*12pcs*70gm),st-0104,pkt,pcs,12,,,,,cat-011,,Caramel Powder Green (1ctn=12pkt*12pcs*70gm)
+a2cec359-181c-4397-93d8-2689a52b9146,كاجو مكسرات RGD W240,st-0105,Kg,gm,1000,,,,,cat-011,,RGD W240Cashew Nuts
+a2cec359-1ae7-4ab1-950d-2553b8bf98f1,تمر(1ctn*100pcs),st-0106,ctn,pcs,100,,,,,cat-011,,DATES
+a2cec359-216e-47c4-a845-4687a557ba72,كعكة,st-0107,pcs,pcs,1,,,,,cat-011,,Cake
+a2cec359-2725-4947-908c-c05be8019933,هلام,st-0108,pcs,pcs,1,,,,,cat-011,,Jelly
+a2cec359-29dd-42c2-a276-ff4705bccf86,كريم كراميل,st-0109,pcs,pcs,1,,,,,cat-011,,Cream Carmel
+a2cec359-2ffa-4b32-a847-1f822652e242,كنافة نوتيلا,st-0110,pcs,pcs,1,,,,,cat-011,,Kunafa nutella
+a2cec359-329a-4e04-9a83-eac943d5d6e8,كريمة الكنافة,st-0111,pcs,pcs,1,,,,,cat-011,,Kunafa Cream
+a2cec359-38c7-46cc-9f7b-92d6f4e9f10d,سكر,st-0112,Kg,gm,1000,,,,,cat-011,,SUGER
+a2cec359-3ea2-4008-a30c-a8c615311453,عسل,st-0113,Kg,gm,1000,,,,,cat-011,,Honey
+a2cec359-418b-41d8-90e5-a7f54a5138ca,مشروب غازي كانز 325مل(24pcs),st-0114,pcs,pcs,1,,,,,cat-012,,Duo 330Ml(1ctn*24pcs)
+a2cec359-482d-4183-8279-0c5cd8f92bac,مشروب غازي1لتر(12pcs),st-0115,pcs,pcs,1,,,,,cat-012,,7UP Diet 330 Ml(1ctn*24pcs)
+a2cec359-4e5e-4dfa-b987-3ff0d48cdf68,مشروب غازي 2 لتر(6pcs),st-0116,pcs,pcs,1,,,,,cat-012,,Pepsi Deit 330 ml(1ctn*24pcs)
+a2cec359-51f1-4214-8f04-46325b87af35,مشروب غازي كانز دايت 325مل(24pcs),st-0117,pcs,pcs,1,,,,,cat-012,,Citrus 330 ml(1ctn*24pcs)
+a2cec359-56e3-4deb-892b-3ba0a9aa9baa,مشروب غازي دايت1لتر(12pcs),st-0118,pcs,pcs,1,,,,,cat-012,,7up 330ml(1ctn*24pcs)
+a2cec359-597c-4a8f-a8c2-c7227cbe8b2b,مشروب غازي دايت 2 لتر(6pcs),st-0119,pcs,pcs,1,,,,,cat-012,,Pepsi 330Ml(1ctn*24pcs)
+a2cec359-5fe0-4877-a44d-40a8236d0c34,مياه نوفا 330 مل(1ctn*40pcs),st-0120,pcs,pcs,1,,,,,cat-012,,NOVA Water 330 Ml
+a2cec359-66c5-48f7-8117-a4d9c709d67b,كيس شاي(1ctn*24pkt*100pcs),st-0121,pkt,pcs,100,,,,,cat-012,,Tea Bag (1ctn*24pkt*100pcs)
+a2cec359-6965-4ad1-8e5c-a7ba8e9d9253,مسحوق الشاي(1ctn*20pkt*454gm),st-0122,pkt,gm,454,,,,,cat-012,,Tea Powder (1ctn*20pkt*454gm)
+a2cec359-6f62-4101-a887-06f66ddfe048,لفائف المندي صغير,st-0123,pcs,pcs,1,,,,,cat-013,,Mandhi roll small
+a2cec359-754a-4ef2-9d2c-011ad3cf7914,لفائف المندي كبير,st-0124,pcs,pcs,1,,,,,cat-013,,Mandhi roll big
+a2cec359-77ee-44e6-a2a7-8b2363d3fab6,لفائف بلاستيك جامبو,st-0125,pcs,pcs,1,,,,,cat-013,,jumbo roll plastic
+a2cec359-7e09-4e72-aa38-ae70f1b74262,طبق ورق أبيض ايدامات 14 أونصة (1ctn*20pkt*50pcs),st-0126,pcs,pcs,1,,,,,cat-013,,white paper bowl Idam14oz (1ctn*20pkt*50pcs)
+a2cec359-80c5-4063-b7c1-2e102df57da8,طبق ورق أبيض ايدامات 16 أونصة (1ctn*20pkt*50pcs),st-0127,pcs,pcs,1,,,,,cat-013,,white paper bowl Idam16oz (1ctn*20pkt*50pcs)
+a2cec359-8706-47ed-9c52-7aa52b2938c9,ألومنيوم صغير الحجم للوجبات الجاهزة(400pcs),st-0128,pcs,pcs,1,,,,,cat-013,,Aluminium Takeaway Small(300pcs)
+a2cec359-8d65-4e72-99f6-14561d5414f5,متوسط ​​الحجم من الألومنيوم للوجبات الجاهزة(400pcs),st-0129,pcs,pcs,1,,,,,cat-013,,Aluminium Takeaway Medium(300pcs)
+a2cec359-9027-47da-ad53-619fa3daa55b,ألومنيوم كبير للوجبات الجاهزة(400pcs),st-0130,pcs,pcs,1,,,,,cat-013,,Aluminium Takeaway Big(300pcs)
+a2cec359-962d-4e4f-a8ba-ea0045f7273c,رقائق ألومنيوم كبيرة 45 سم(1ctn*6pcs),st-0131,pcs,pcs,1,,,,,cat-013,,Aluminium Foil Big 45CM(1ctn*6pcs)
+a2cec359-9c52-45a7-ad05-23a6bd70cbcc,رقائق ألومنيوم صغيرة 30 سم(1ctn*6pcs),st-0132,pcs,pcs,1,,,,,cat-013,,Aluminium Foil Small 30 cm(1ctn*6pcs)
+a2cec359-9ef2-49f5-9e55-1602165fd9a9,وعاء سلطة إفطار أسود (1*300 قطعة),st-0133,pcs,pcs,1,,,,,cat-013,,BreakFast Salad Bowl Black (1*300pcs)
+a2cec359-a543-4cd7-b90b-65275287b142,صينية طعام دائرية من الألومنيوم (1038)(1ctn*50pcs),st-0134,pcs,pcs,1,,,,,cat-013,,Aluminium Food Round Tray (1038)(1ctn*50pcs)
+a2cec359-abaf-4076-b338-eac7736eb22f,صينية طعام دائرية من الألومنيوم (1039)(1ctn*25pcs),st-0135,pcs,pcs,1,,,,,cat-013,,Aluminium Food Round Tray (1039)(1ctn*25pcs)
+a2cec359-ae87-4ccd-9a5d-5a88e42202a6,أطباق السلطة 206(1ctn*10pkt*500pcs),st-0136,pcs,pcs,1,,,,,cat-013,,Salad Bowl 206(1ctn*10pkt*500pcs)
+a2cec359-b4cc-4d5c-bce0-604d8fe6df5c,أطباق السلطة 205(1ctn*10pkt*500pcs),st-0137,pcs,pcs,1,,,,,cat-013,,Salad Bowl 205 (1ctn*10pkt*500pcs)
+a2cec359-b774-4626-9a76-638db4ab8ea8,"أكواب صلصة شفافة سعة 4 أونصة مع غطاء،(1ctn*40pkt*50pcs)",st-0138,pcs,pcs,1,,,,,cat-013,,Sauce Cup Clear 4Oz With Lid (1ctn*20pkt*50pcs)
+a2cec359-be8f-4fe3-a83e-f67e2f693817,"أكواب صلصة شفافة سعة 2 أونصة مع غطاء،(1ctn*40pkt*50pcs)",st-0139,pcs,pcs,1,,,,,cat-013,,Sauce Cup Clear 2Oz With Lid (1ctn*20pkt*100pcs)
+a2cec359-c497-45bb-8277-17225ae1c2c8,كوب ماء (1ctn*20pkt*50pcs),st-0140,pcs,pcs,1,,,,,cat-013,,Water Cup(1ctn*20pkt*50pcs)
+a2cec359-cb42-4212-b065-f567457614d1,كوباية قهوة 8 أونصة1BOX x 500PCS,st-0141,pcs,pcs,1,,,,,cat-013,,COFFEE CUP 8OZ WHITE  1BOX x 500PCS
+a2cec359-cde9-4727-8efc-9ecd69d16f22,غطا كوباية قهوة1BOX x 1000PCS,st-0142,pcs,pcs,1,,,,,cat-013,,COFFEE COVER  8OZ - 9OZ WHITE 1BOX x 1000PCS
+a2cec359-d51e-482b-83f2-ecfd10f13bd1,كوب شاي ورقي(1ctn*20pkt*50pcs),st-0143,pcs,pcs,1,,,,,cat-013,,Paper TEA Cup(1ctn*20pkt*50pcs)
+a2cec359-dae8-436b-a262-3aa637234b46,طقم ملاعق لكبار الشخصيات,st-0144,pkt,pcs,2000,,,,,cat-013,,Vip Spoon set
+a2cec359-de6a-464c-abc5-0c09143c1a1d,ملعقة (50 قطعة × 20 عبوة),st-0145,pkt,pcs,50,,,,,cat-013,,Spoon ( pices50*20Packet )
+a2cec359-e551-4aef-8f96-ddb91a8a5279,ملعقة شاي صغيرة (1ctn*20pkt*50pcs),st-0146,pkt,pcs,50,,,,,cat-013,,Spoon Tea Small (1x1000pcs)
+a2cec359-ebab-46d3-9546-456932e187a2,علبة إفطار مطبوعة مكونة من 6 حصص,st-0147,pcs,pcs,1,,,,,cat-013,,Printed Break Fast 6 Portions Box
+a2cec359-f254-46d1-bdd3-3f226ec56332,صندوق غداء مطبوع نصف,st-0148,pcs,pcs,1,,,,,cat-013,,Printed Lunch Box Half
+a2cec359-f52f-40ee-9c16-e1462793996f,صندوق غداء الطابعة ممتلئ,st-0149,pcs,pcs,1,,,,,cat-013,,Printer Lunch Box full
+a2cec359-fb2c-48c3-8cd1-e194885032fd,علبة إفطار مطبوعة بثلاث حصص,st-0150,pcs,pcs,1,,,,,cat-013,,Printed Break Fast 3 Portions Box
+a2cec35a-01f7-435c-b979-f392e9fa3c5d,زجاجة شاي مطبوعة من الورق المقوى,st-0151,pcs,pcs,1,,,,,cat-013,,Printed Tea Carbod Bottel
+a2cec35a-04b6-48e9-86a1-1889235a8805,حقيبة تسوق مطبوعة(1ctn*12kg),st-0152,Kg,gm,1000,,,,,cat-013,,Printed Shopping Bag(1ctn*12kg)
+a2cec35a-0ae4-4b9d-9bad-8c049faf092a,سفرة طعام مطبوعة 90*90(1ctn*15kg),st-0153,Kg,gm,1000,,,,,cat-013,,Printed Dining Sufra 90*90(1ctn*15kg)
+a2cec35a-1194-4b61-9ea0-7e720b54fd7a,أكياس نايلون(1pcs=5gm),st-0154,Kg,gm,1000,,,,,cat-013,,Nylon Bags (1pcs=5gm)
+a2cec35a-14d3-4e60-845c-55a8f86c5f35,قائمة أمين الصندوق(1ctn*50pcs),st-0155,pcs,pcs,1,,,,,cat-013,,Cashier Roll(1ctn*50pcs)
+a2cec35a-1b80-476a-a35f-e838161b316e,حقيبة الصيدلية(1bag*15kg),st-0156,Bag,gm,15000,,,,,cat-013,,Pharmacy Bag (1bag*15kg)
+a2cec35a-221a-44d6-9606-69121c4232a3,غطاء جسم بلاستيكي للمئزر (10x100),st-0157,pkt,pcs,100,,,,,cat-014,,Apron Plastic (10x100) Body Cover
+a2cec35a-24c9-445b-b931-db611624a8fc,أعواد أسنان (1ctn*24pkt*50pcs),st-0158,pkt,pcs,50,,,,,cat-013,,Thooth Pick (1ctn*24pkt*50pcs)
+a2cec35a-2b07-4602-bf9f-30f1095e9120,قفازات بلاستيكية (7000 قطعة),st-0159,pkt,Pcs,100,,,,,cat-014,,Gloves Plastic  (7000 pcs)
+a2cec35a-30d4-494b-a136-46347337c81f,قفاز فينيل مقاس (1ctn*10pkt*100pcs)XL,st-0160,pkt,pcs,100,,,,,cat-014,,Vinyl Glove XL Size(1ctn*20pkt*50pcs)
+a2cec35a-3413-4662-8afe-ec5f23487902,قفاز فينيل مقاس كبير(1ctn*10pkt*100pcs),st-0161,pkt,pcs,100,,,,,cat-014,,Vinyl Glove L Size(1ctn*20pkt*50pcs)
+a2cec35a-3abe-4368-9174-c8b2700c2ff9,غطاء رأس (10 علب × 100 قطع),st-0162,pkt,pcs,100,,,,,cat-014,,head cover (1*10BOX*100PCS)
+a2cec35a-406d-4234-a1b4-ec8639a05536,قناع وجه(1ctn*40pkt*50pcs),st-0163,pkt,pcs,100,,,,,cat-014,,Face Mask(1ctn*20pkt*100pcs)
+a2cec35a-431f-4003-8f90-a6e4b4787cef,"مناديل جافة للمسح، 475 ورقة (بايلور1) أزرق",st-0164,pcs,pcs,1,,,,,cat-014,,dry wipe Wipping 475 sheets  (baelor 1)blue
+a2cec35a-4a64-418e-95c6-a0c7fd227ddb,ليفة تنظيف إسفنجية (1*180 قطعة),st-0165,pcs,pcs,1,,,,,cat-014,,Sponch scruber (1*180pcs)
+a2cec35a-5062-4240-add0-4ac73eb02bf2,ليفة تنظيف الومنيوم (1ctn*50pcs),st-0166,pcs,pcs,1,,,,,cat-014,,Satinless Steel Scruber (1ctn*50pcs)
+a2cec35a-5324-445e-9e5c-3f7ba618938d,علبة مناديل ورقية فاخرة مطبوعة من بيث هانيز (1*6*6=36 علبة),st-0167,pkt,pcs,6,,,,,cat-014,,Bith Haneez Printed Fine Tissue Paper Box (1*6*6=36box )
+a2cec35a-59dc-40f0-be68-8e42d5bbd03d,لفائف مناديل,st-0168,Bag,pcs,6,,,,,cat-014,,Hand Towel Rolls Fine Solution Prime
+a2cec35a-60ae-4392-b9e4-65b39fde740a,علبة مناديل ورقية(1ctn*6pkt*6pcs),st-0169,ctn,pkt,36,,,,,cat-014,,Tissue Box Customer(1ctn*6pkt*6pcs)
+a2cec35a-678d-4681-b13d-5a6323c36ecb,كيس قمامة (1bag*10kg),st-0170,Bag,gm,10000,,,,,cat-014,,Grabage Bag 90 Galoon(1bag*10kg)
+a2cec35a-6a7e-488f-8529-a2dd64051761,تلميع الفولاذ المقاوم للصدأ(1ctn*12pcs),st-0171,pcs,pcs,1,,,,,cat-014,,Satinless Steel Polish(1ctn*12pcs)
+a2cec35a-704f-4d4f-a469-049551789609,صابون غسل اليدين(1ctn*4pcs),st-0172,pcs,pcs,1,,,,,cat-014,,Fom Hand WASH(1ctn*4pcs)
+a2cec35a-771d-4abf-83a4-acc79e85ed38,منظف الزجاج (1*12قطع*650 مل = 7800 مل),st-0173,pcs,Ml,650,,,,,cat-014,,Glass Cleaner (1*12pc*650ml =7800ml)
+a2cec35a-79ca-4a93-95d6-30ea8a56aee0,منظف ​​زجاج كبير 30 لتر,st-0174,liter,Ml,30000,,,,,cat-014,,glass cleaner big 30 LITER
+a2cec35a-8009-414c-bf61-584f82c1c0b6,منظف أطباق سعة 30 لترًا,st-0175,liter,Ml,30000,,,,,cat-014,,DishWashier  30 liter
+a2cec35a-86c5-4512-afb7-3e47d20312f7,كلوركس (30 لتر),st-0176,liter,Ml,30000,,,,,cat-014,,Clorox (30Liter)
+a2cec35a-8970-4387-8192-ba2edc1df6b3,منظف ​​الأرضيات (30 لترًا),st-0177,liter,Ml,30000,,,,,cat-014,,Floor Cleaner ( 30 Liter )
+a2cec35a-8f9b-4552-9d63-c9904e6caa65,مسحوق صابون التنظيف(1bag*25kg),st-0178,kg,gm,1000,,,,,cat-014,,Detergent Soap Powder(1bag*25kg)
+a2cec35a-966b-43ee-9bc2-76b62af30e68,بخاخ كولونيا 114 ( 1x 24pcs ),st-0179,pcs,pcs,1,,,,,cat-014,,Colonia Spary  114 ( 1x 24pcs )
+a2cec35a-993c-4d6d-ad89-304e955e34e2,معطر جو 300 مل (1ctn*48pcs),st-0180,pcs,pcs,1,,,,,cat-014,,Air Freshener 300 ML ( 1 x 48 pcs )
+a2cec35a-a032-438c-8e48-8ab6885c7f11,مكنسة,st-0181,pcs,pcs,1,,,,,cat-014,,Broom
+a2cec35a-a602-43c1-a3ee-8d7b68eff697,يد مكنسة الومنيوم,st-0182,pcs,pcs,1,,,,,cat-014,,Aluminum broom handle
+a2cec35a-a8b3-4244-9a34-7781b7561aff,مساحة أرضيات 22 بوصة أزرق,st-0183,pcs,pcs,1,,,,,cat-014,,"Floor Squeeze 22"" Blue"
+a2cec35a-aeda-4940-bc41-b70c9785841e,فرشاة سطح مزدوجة زرقاء,st-0184,pcs,pcs,1,,,,,cat-014,,Dual Surface Deck Brush Blue
+a2cec35a-b5a3-4d49-980f-b3406efcea90,مرخ 1,st-0185,pcs,pcs,1,,,,,cat-015,,Marah
+a2cec35a-b84a-4643-8d4a-e7399b84a71c,مرخ 2,st-0186,pcs,pcs,1,,,,,cat-015,,MARAH 2
+a2cec35a-be70-4726-9539-85acfa7458c9,لهب تسخين الطعام 1*72,st-0187,pcs,pcs,1,,,,,cat-015,,Food Heating Flame 1* 72
+a2cec35a-c54c-47ac-85f2-e9bb61bbbed7,الفحم(1ctn*10kg),st-0188,Kg,gm,1000,,,,,cat-015,,Coal(1ctn*10kg)
+a2cec35a-c801-4bb0-96b6-88e4f9438e37,حجر مازبهي,st-0189,Nos,pcs,13,,,,,cat-015,,Mazbhi Stone
+a2cec35a-ce02-4c8f-ac71-ddc7eba57614,حطب النار,st-0190,Bag,gm,10000,,,,,cat-015,,Fire Wood
+a2cec35a-d4de-46a9-881b-fa1534bea66a,ملوخية خضراء,st-0191,Kg,gm,1000,,,,,cat-004,,molokhia Veg
+a2dcc992-a2e4-40e3-9289-a7bccc26d186,لبن زبادي القرية 10 كيلو,st-0192,pcs,pcs,1,,,,,cat-008,,AlQarya Yogurt 10 Kg
+a2e074c7-a2d9-45e8-ae0d-2be6f0b1a4a1,غطاء صحن قصدير 1028(1ctn*400pcs),st-0193,pcs,pcs,1,,,,,cat-013,,1028 Tin Plate Lid (1ctn*400pcs)
+a2e0831f-08c0-4f78-b666-fba05c5a71ee,مشروب غازي كانز سعودي 320مل(24pcs),st-0194,pcs,pcs,1,,,,,cat-012,,Saudi Cans Soft Drink 320ml(24pcs)

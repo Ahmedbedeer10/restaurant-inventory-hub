@@ -1,0 +1,30 @@
+﻿id,name,sku,storage_unit,ingredient_unit,storage_to_ingredient_factor,cost,minimum_level,par_level,maximum_level,category_reference,barcode,name_localized
+a2cec35a-d77a-48d4-8348-279927bc9aa3,لحم تيس حنيذ انتاج,pru-0296,nos,person,16,,,,,cat-016,,Haneez meat
+a2cec35a-ddb3-4f13-bab4-a1b560fb135a,لحم تيس مندي انتاج,pru-0297,nos,person,16,,,,,cat-016,,Mandi meat
+a2cec35a-e089-42a7-a813-d7f2df2b6b8a,دجاج حنيذ انتاج,pru-0298,pcs,pcs,1,,,,,cat-016,,Mandi Chicken
+a2cec35a-e67d-46ca-87a7-e6dd64bd5bf2,دجاج مندي انتاج,pru-0299,pcs,pcs,1,,,,,cat-016,,Haneez Chicken
+a2cec35a-ed64-4f5f-b8a0-642ad7d78b8b,دجاج شواية انتاج,pru-0300,pcs,pcs,1,,,,,cat-016,,Chicken Grill
+a2cec35a-f0d8-4d92-9df8-57fe52f1e659,دجاج مظبي انتاج,pru-0301,pcs,pcs,1,,,,,cat-016,,Madhbi Chicken
+a2cec35a-f64f-49d8-9037-37dc0c4d9c28,دجاج مضغوط انتاج,pru-0302,pcs,pcs,1,,,,,cat-016,,Pressed Chicken
+a2cec35a-fcda-456c-bc78-0ee984cb1544,رز حنيذ انتاج,pru-0303,kg,gm,1000,,,,,cat-016,,Haneeth rice
+a2cec35a-ff8a-4285-98a1-8fe78b01ae2b,رز مندي انتاج,pru-0304,kg,gm,1000,,,,,cat-016,,Mandi rice
+a2cec6c7-00b6-4fd2-9314-c78cf45eda8e,رز بشاور انتاج,pru-0305,kg,gm,1000,,,,,cat-016,,Rice Bashawar
+a2cec6c7-0433-4617-9a8f-822c65943f5e,رز شعبي انتاج,pru-0306,kg,gm,1000,,,,,cat-016,,Popular rice
+a2cec6c7-07a9-45e3-ba18-c1a5c702fb3d,رز سليق انتاج,pru-0307,kg,gm,1000,,,,,cat-016,,Saleeq rice
+a2cec6c7-0d5d-4fd5-9ac5-bcac6b0b507c,جريش انتاج,pru-0308,kg,gm,1000,,,,,cat-016,,Jeresh Production
+a2cec6c7-109d-4e54-954a-a9a67eb6119d,قرصان انتاج,pru-0309,kg,gm,1000,,,,,cat-016,,Qursan Production
+a2cec6c7-1749-422c-b6a1-7542f76bbd71,مكرونة انتاج,pru-0310,kg,gm,1000,,,,,cat-016,,Pasta Production
+a2cec6c7-1d9a-4c41-a569-0764687f5f8c,مرق انتاج,pru-0311,liter,ml,1000,,,,,cat-016,,Soup Production
+a2cec6c7-20c7-4567-8dd1-5d0385fd8282,ملوخية انتاج,pru-0312,kg,gm,1000,,,,,cat-016,,Molokhia Production
+a2cec6c7-2600-4971-a949-eec05ec1e9e5,بامية انتاج,pru-0313,kg,gm,1000,,,,,cat-016,,Okra Production
+a2cec6c7-2c95-466c-a768-8f946deb0dbf,خضار مشكل انتاج,pru-0314,kg,gm,1000,,,,,cat-016,,Mixed Vegetables Production
+a2cec6c7-2fc6-4df2-aa0e-87cc88467a46,مسقعة باللحمة المفرومة انتاج,pru-0315,kg,gm,1000,,,,,cat-016,,Moussaka with mixed meat Production
+a2cec6c7-3658-4c9b-aa0f-00fe13eb6193,لحم حاشي مضغوط انتاج,pru-0316,kg,gm,1000,,,,,cat-016,,Pressed Meat Pork Production
+a2d8cac5-d2a4-487d-9461-2c17205af9a5,مسقعة سادة انتاج,pru-0317,Kg,gm,1000,,,,,cat-016,,Plain Moussaka production
+a2d8ed55-a5f0-46eb-bd64-879a42a1c5c2,سلطة خضارانتاج,pru-0318,pcs,gm,155,,,,,cat-016,,Vegetable SaladProduction
+a2d8ed55-af54-40d0-8267-cdd609a0491f,سلطة حار خضراء انتاج,pru-0319,pcs,gm,106,,,,,cat-016,,Green Spicy Salad Production
+a2d8ed55-b727-448c-9c16-304ff5cd3ae9,سلطة دقوس حار انتاج,pru-0320,pcs,gm,106,,,,,cat-016,,Spicy Dakoos Salad Production
+a2d8ed55-be15-46dd-8645-df23d2a4cc98,سلطة دقوس بارد انتاج,pru-0321,pcs,gm,106,,,,,cat-016,,Cold Dakoos Salad Production
+a2d8ed55-c4ab-4b01-9073-09c0eae33594,سلطة خيار وزبادي انتاج,pru-0322,pcs,gm,145,,,,,cat-016,,Cucumber Salad & Yogurt Production
+a2d8ed55-c7c5-4828-83fc-66dd658be298,طحينة انتاج,pru-0323,pcs,gm,106,,,,,cat-016,,Tahini Production
+a2da979b-2dca-4084-98c0-f25bd7c15abe,عصيدة انتاج,pur-0324,Kg,gm,1000,,,,,cat-016,,
