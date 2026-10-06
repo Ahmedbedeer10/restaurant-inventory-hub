@@ -7,6 +7,12 @@ from PIL import Image
 from datetime import date
 from translations import LANGUAGES
 
+# مكتبات توليد الـ PDF الحقيقي
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+
 st.set_page_config(page_title="Operations & Integrated Inventory Hub", layout="wide")
 
 # 1. إعداد وتحديث جداول قاعدة البيانات
@@ -187,6 +193,39 @@ st.sidebar.markdown(f"**المستخدم:** {st.session_state.name}")
 st.sidebar.markdown(f"**الفرع:** `{st.session_state.branch}`")
 st.sidebar.divider()
 
+# دالة مساعدة لتوليد ملف PDF حقيقي من أي DataFrame
+def generate_pdf_report(df, title_text):
+    pdf_buffer = io.BytesIO()
+    doc = SimpleDocTemplate(pdf_buffer, pagesize=letter, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+    elements = []
+    
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], fontName='Helvetica-Bold', fontSize=16, alignment=1, spaceAfter=15)
+    
+    elements.append(Paragraph(title_text, title_style))
+    elements.append(Spacer(1, 10))
+    
+    # تحويل بيانات الجدول إلى تنسيق ReportLab
+    table_data = [list(df.columns)] + df.astype(str).values.tolist()
+    
+    t = Table(table_data)
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2c3e50')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 10),
+        ('BOTTOMPADDING', (0,0), (-1,0), 8),
+        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#ecf0f1')),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('FONTSIZE', (0,1), (-1,-1), 8),
+    ]))
+    
+    elements.append(t)
+    doc.build(elements)
+    pdf_buffer.seek(0)
+    return pdf_buffer.getvalue()
+
 # ----------------- واجهة الكاشير / الفرع -----------------
 if st.session_state.role == "cashier":
     st.sidebar.markdown("### 🗂️ القائمة الرئيسية للفرع")
@@ -249,7 +288,7 @@ if st.session_state.role == "cashier":
             st.success(f"تم حفظ الحركات بنجاح!")
             st.session_state.ops_rows = [{"item": list(item_dict.keys())[0], "qty": 1.0, "reason": ""}]
 
-    elif c_mode == "🗑️ الهدر والتالف (الإنتاج والمخزون)":
+    elif c_mode == "🗑️️ الهدر والتالف (الإنتاج والمخزون)":
         st.subheader("🗑️ تسجيل الهدر والتالف اليومي (منتجات نهائية أو خامات مخزن)")
         waste_target = st.radio("حدد نوع التالف/الهدر:", ["هدر إنتاج (منتجات نهائية)", "هدر خامات مخزن"], horizontal=True)
         w_source = "production" if "إنتاج" in waste_target else "inventory"
@@ -368,7 +407,7 @@ elif st.session_state.role == "admin":
 
     elif admin_section == "📊 تقرير المدفوعات والمبيعات (مطابق للـ PDF)":
         st.subheader("📊 تحليل واستيراد ملف المدفوعات والمبيعات (مطابق تماماً لتقرير الـ PDF)")
-        st.write("قم برفع ملف الـ CSV الخاص بالمدفوعات لتوليد تقرير موحد ومقسّم حسب الفروع وقنوات الدفع.")
+        st.write("قم برفع ملف الـ CSV الخاص بالمدفوعات لتوليد تقرير موحد ومقسّم حسب الفروع وقنوات الدفع مع إمكانية التحميل بكافة الصيغ (PDF, Excel, CSV).")
         
         uploaded_payment_file = st.file_uploader("اختر ملف المدفوعات المصدر من فودكس (CSV)", type=["csv"], key="pdf_like_report_uploader")
         
@@ -405,7 +444,20 @@ elif st.session_state.role == "admin":
                 
                 st.success("✨ تم تحليل ملف المدفوعات وتوليد التقرير بنجاح مطابَقاً لنموذج الـ PDF!")
                 st.dataframe(final_report.style.format({c: "{:,.2f}" for c in final_report.columns if c != 'Branch Name'}), use_container_width=True)
-                st.download_button("📥 تحميل التقرير النهائي (Excel / CSV)", final_report.to_csv(index=False).encode('utf-8-sig'), "Daily_Sales_Report_Formatted.csv", "text/csv")
+                
+                # أزرار التحميل بكافة الصيغ المطلوبة (PDF, Excel, CSV)
+                col_d1, col_d2, col_d3 = st.columns(3)
+                with col_d1:
+                    pdf_data = generate_pdf_report(final_report, "Daily Sales & Payments Report")
+                    st.download_button("📥 تحميل PDF حقيقي", pdf_data, "Daily_Sales_Report.pdf", "application/pdf")
+                with col_d2:
+                    excel_buffer = io.BytesIO()
+                    with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                        final_report.to_excel(writer, index=False, sheet_name='Daily Sales')
+                    st.download_button("📥 تحميل Excel", excel_buffer.getvalue(), "Daily_Sales_Report.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                with col_d3:
+                    st.download_button("📥 تحميل CSV", final_report.to_csv(index=False).encode('utf-8-sig'), "Daily_Sales_Report.csv", "text/csv")
+
             except Exception as e:
                 st.error(f"حدث خطأ أثناء معالجة ملف المدفوعات: {e}")
 
@@ -470,16 +522,18 @@ elif st.session_state.role == "admin":
         if not df_closings.empty:
             sel_report_id = st.selectbox("اختر رقم التقرير للطباعة والمراجعة:", df_closings['id'].tolist())
             r_data = df_closings[df_closings['id'] == sel_report_id].iloc[0]
-            voucher_html = f"""
-            <div style="border: 2px solid #000; padding: 20px; font-family: Cairo; background: #fff; color: #000;">
-                <h3 style="text-align: center;">إغلاق فرع {r_data['branch']}</h3>
-                <p>التاريخ: {r_data['closing_date']} | الكاشير: {r_data['cashier_name']}</p>
-                <hr/>
-                <p>إجمالي المبيعات: <b>{r_data['total_sales']:,.2f} SAR</b></p>
-            </div>
-            """
-            st.components.v1.html(voucher_html, height=250)
-            st.download_button("📥 تحميل التقرير Excel", df_closings.to_csv(index=False).encode('utf-8-sig'), "closings.csv", "text/csv")
+            
+            # أزرار تحميل تقرير الإغلاق بكافة الصيغ
+            col_b1, col_b2, col_b3 = st.columns(3)
+            with col_b1:
+                pdf_cls = generate_pdf_report(pd.DataFrame([r_data]), f"Cashier Closing Report - Branch {r_data['branch']}")
+                st.download_button("📥 تحميل التقرير PDF", pdf_cls, f"Closing_{r_data['branch']}.pdf", "application/pdf")
+            with col_b2:
+                ex_cls = io.BytesIO()
+                with pd.ExcelWriter(ex_cls, engine='openpyxl') as wr: pd.DataFrame([r_data]).to_excel(wr, index=False)
+                st.download_button("📥 تحميل التقرير Excel", ex_cls.getvalue(), f"Closing_{r_data['branch']}.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            with col_b3:
+                st.download_button("📥 تحميل التقرير CSV", pd.DataFrame([r_data]).to_csv(index=False).encode('utf-8-sig'), f"Closing_{r_data['branch']}.csv", "text/csv")
 
     elif admin_section == "⚖️ ميزان المخزون والجرد":
         st.subheader("⚖️ ميزان المخزون ومطابقة فروقات الجرد")
@@ -496,7 +550,19 @@ elif st.session_state.role == "admin":
 
         m_items["الرصيد الدفتري المتوقع"] = m_items["المشتريات (+)"] + m_items["الإنتاج (+)"] - m_items["المنصرف (-)"] - m_items["الهدر (-)"] - m_items["وجبات (-)"] - m_items["تحويل صادر (-)"]
         m_items["فارق الجرد (عجز/زيادة)"] = m_items["الجرد الفعلي"] - m_items["الرصيد الدفتري المتوقع"]
-        st.dataframe(m_items.reset_index(), use_container_width=True)
+        df_bal = m_items.reset_index()
+        st.dataframe(df_bal, use_container_width=True)
+        
+        # أزرار تحميل ميزان المخزون بكافة الصيغ
+        cb1, cb2, cb3 = st.columns(3)
+        with cb1:
+            st.download_button("📥 تحميل الميزان PDF", generate_pdf_report(df_bal, f"Inventory Balance - {r_b}"), f"Balance_{r_b}.pdf", "application/pdf")
+        with cb2:
+            bx = io.BytesIO()
+            with pd.ExcelWriter(bx, engine='openpyxl') as wr: df_bal.to_excel(wr, index=False)
+            st.download_button("📥 تحميل الميزان Excel", bx.getvalue(), f"Balance_{r_b}.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        with cb3:
+            st.download_button("📥 تحميل الميزان CSV", df_bal.to_csv(index=False).encode('utf-8-sig'), f"Balance_{r_b}.csv", "text/csv")
 
     elif admin_section == "🍗 تحليل استهلاك الخامات الذكي":
         st.subheader("🍗 تحليل استهلاك الخامات من تقرير فودكس")
@@ -528,7 +594,19 @@ elif st.session_state.role == "admin":
 
     else:
         st.subheader("📋 سجل العمليات اليومية لكافة الفروع")
-        st.dataframe(pd.read_sql_query("SELECT * FROM operations_log ORDER BY id DESC", conn), use_container_width=True)
+        df_ops = pd.read_sql_query("SELECT * FROM operations_log ORDER BY id DESC", conn)
+        st.dataframe(df_ops, use_container_width=True)
+        
+        # أزرار تحميل سجل العمليات بكافة الصيغ
+        co1, co2, co3 = st.columns(3)
+        with co1:
+            st.download_button("📥 تحميل السجل PDF", generate_pdf_report(df_ops, "Operations Log"), "Operations_Log.pdf", "application/pdf")
+        with co2:
+            ox = io.BytesIO()
+            with pd.ExcelWriter(ox, engine='openpyxl') as wr: df_ops.to_excel(wr, index=False)
+            st.download_button("📥 تحميل السجل Excel", ox.getvalue(), "Operations_Log.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        with co3:
+            st.download_button("📥 تحميل السجل CSV", df_ops.to_csv(index=False).encode('utf-8-sig'), "Operations_Log.csv", "text/csv")
 
 # زر تسجيل الخروج في أسفل القائمة الجانبية للجميع
 st.sidebar.divider()
