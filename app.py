@@ -199,7 +199,6 @@ if st.session_state.role == "cashier":
 
     st.title(f"📍 بوابة الفرع - {st.session_state.name}")
 
-    # 1. إدخال العمليات التشغيلية العادية
     if c_mode == "العمليات والتشغيل اليومي":
         st.sidebar.markdown("---")
         st.sidebar.markdown("### ⚙️ نوع الحركة")
@@ -250,10 +249,8 @@ if st.session_state.role == "cashier":
             st.success(f"تم حفظ الحركات بنجاح!")
             st.session_state.ops_rows = [{"item": list(item_dict.keys())[0], "qty": 1.0, "reason": ""}]
 
-    # 2. الهدر والتالف (للإنتاج أو خامات المخزن)
     elif c_mode == "🗑️ الهدر والتالف (الإنتاج والمخزون)":
         st.subheader("🗑️ تسجيل الهدر والتالف اليومي (منتجات نهائية أو خامات مخزن)")
-        
         waste_target = st.radio("حدد نوع التالف/الهدر:", ["هدر إنتاج (منتجات نهائية)", "هدر خامات مخزن"], horizontal=True)
         w_source = "production" if "إنتاج" in waste_target else "inventory"
         
@@ -262,14 +259,9 @@ if st.session_state.role == "cashier":
         
         with st.form("waste_form"):
             w_date = st.date_input("تاريخ الهدر:", value=date.today())
-            
-            if "waste_rows" not in st.session_state:
-                st.session_state.waste_rows = [{"item": list(w_item_dict.keys())[0] if w_item_dict else "", "qty": 1.0, "reason": ""}]
-            
-            st.markdown("#### أصناف التالف:")
             selected_w_item = st.selectbox("اختر الصنف التالف:", list(w_item_dict.keys()) if w_item_dict else ["لا توجد أصناف"])
             w_qty = st.number_input("الكمية التالفة:", min_value=0.1, step=0.5, value=1.0)
-            w_reason = st.text_input("سبب التالف / الهدر (إجباري):", placeholder="مثال: احتراق أثناء الشوي / انتهاء صلاحية / سقوط")
+            w_reason = st.text_input("سبب التالف / الهدر (إجباري):", placeholder="مثال: احتراق أثناء الشوي / انتهاء صلاحية")
             
             if st.form_submit_button("💾 تسجيل وترحيل الهدر والتالف للنظام", type="primary", use_container_width=True):
                 if selected_w_item and selected_w_item != "لا توجد أصناف":
@@ -283,7 +275,6 @@ if st.session_state.role == "cashier":
                 else:
                     st.warning("يرجى اختيار صنف صحيح!")
 
-    # 3. تقرير إغلاق الكاشير اليومي
     elif c_mode == "📝 تقرير الإغلاق المالي":
         st.subheader("📝 تقرير الإيرادات والمبيعات اليومية المستلمة (Daily Closing Sheet)")
         with st.form("cashier_closing_form"):
@@ -312,8 +303,6 @@ if st.session_state.role == "cashier":
                 """, (st.session_state.branch, str(cl_date), c_name, c_cash, c_mada, c_visa, c_master, c_trans, c_hunger, c_jahez, c_ninja, c_keeta, c_exp_note, c_exp_amt, c_total, st.session_state.user))
                 conn.commit()
                 st.success("تم إرسال تقرير الإغلاق المالي بنجاح إلى الإدارة والمحاسب!")
-
-    # 4. الجرد الفعلي الدوري
     else:
         st.subheader("📋 الجرد الدوري الفعلي للمخزون")
         df_inv = pd.read_sql_query("SELECT sku, name_ar, storage_unit, ingredient_unit FROM items_master WHERE item_type='inventory' ORDER BY name_ar ASC", conn)
@@ -338,6 +327,7 @@ elif st.session_state.role == "admin":
     
     admin_section = st.sidebar.radio("🗂️ أقسام الإدارة:", [
         "📥 استيراد مشتريات فودكس (سريع)",
+        "📊 تقرير المدفوعات والمبيعات (مطابق للـ PDF)",
         "🛒 إدخال المشتريات اليدوية",
         "📑 تقارير إغلاق الكاشيرات والطباعة",
         "⚖️ ميزان المخزون والجرد",
@@ -375,6 +365,49 @@ elif st.session_state.role == "admin":
                     st.success(f"تم ترحيل وحفظ {count} بند مشتريات بنجاح من ملف فودكس!")
             except Exception as e:
                 st.error(f"حدث خطأ أثناء معالجة الملف: {e}")
+
+    elif admin_section == "📊 تقرير المدفوعات والمبيعات (مطابق للـ PDF)":
+        st.subheader("📊 تحليل واستيراد ملف المدفوعات والمبيعات (مطابق تماماً لتقرير الـ PDF)")
+        st.write("قم برفع ملف الـ CSV الخاص بالمدفوعات لتوليد تقرير موحد ومقسّم حسب الفروع وقنوات الدفع.")
+        
+        uploaded_payment_file = st.file_uploader("اختر ملف المدفوعات المصدر من فودكس (CSV)", type=["csv"], key="pdf_like_report_uploader")
+        
+        if uploaded_payment_file is not None:
+            try:
+                df = pd.read_csv(uploaded_payment_file)
+                branch_mapping = {'ELarouba': 'Alarouba', 'Malqa': 'Malqa', 'Alrawdah': 'AlRawdah', 'AlRawdah': 'AlRawdah', 'Laban': 'Laban'}
+                df['Branch_Clean'] = df['الفرع'].map(branch_mapping).fillna(df['الفرع'])
+                
+                pivot_df = df.pivot_table(index='Branch_Clean', columns='طريقة الدفع', values='المبلغ الصافي', aggfunc='sum', fill_value=0.0)
+                expected_cols = ['Cash', 'MADA', 'Bank Trancefer', 'Jahez', 'KEETA', 'Hungerstion', 'Ninja', 'The Chefz']
+                for col in expected_cols:
+                    if col not in pivot_df.columns: pivot_df[col] = 0.0
+                
+                pos_bank_cols = [c for c in ['MADA', 'Bank Trancefer', 'Visa', 'MasterCard'] if c in pivot_df.columns]
+                pivot_df['Pos Bank'] = pivot_df[pos_bank_cols].sum(axis=1) if pos_bank_cols else 0.0
+                pivot_df['Cash Sales'] = pivot_df.get('Cash', 0.0)
+                pivot_df['Total Sales Cash'] = pivot_df['Cash Sales'] + pivot_df['Pos Bank']
+                pivot_df['Keeta'] = pivot_df.get('KEETA', 0.0)
+                pivot_df['Jahez'] = pivot_df.get('Jahez', 0.0)
+                pivot_df['Hungerstion'] = pivot_df.get('Hungerstion', 0.0)
+                pivot_df['Ninja'] = pivot_df.get('Ninja', 0.0)
+                pivot_df['The Chefz'] = pivot_df.get('The Chefz', 0.0)
+                
+                credit_cols = ['Keeta', 'Jahez', 'Hungerstion', 'Ninja', 'The Chefz']
+                pivot_df['Total Sales Credit'] = pivot_df[credit_cols].sum(axis=1)
+                pivot_df['Total Sales'] = pivot_df['Total Sales Cash'] + pivot_df['Total Sales Credit']
+                
+                final_report = pivot_df[['Cash Sales', 'Pos Bank', 'Total Sales Cash', 'Keeta', 'Jahez', 'Hungerstion', 'Ninja', 'The Chefz', 'Total Sales Credit', 'Total Sales']].reset_index()
+                totals = final_report.select_dtypes(include=['number']).sum()
+                totals['Branch_Clean'] = 'Total Sales Biet Elhaneeth'
+                final_report = pd.concat([final_report, pd.DataFrame([totals])], ignore_index=True)
+                final_report.columns = ['Branch Name', 'Cash', 'Pos Bank', 'Total Sales Cash', 'Keeta', 'Jahez', 'Hungerstion', 'Ninja', 'The Chefz', 'Total Sales Credit', 'Total Sales']
+                
+                st.success("✨ تم تحليل ملف المدفوعات وتوليد التقرير بنجاح مطابَقاً لنموذج الـ PDF!")
+                st.dataframe(final_report.style.format({c: "{:,.2f}" for c in final_report.columns if c != 'Branch Name'}), use_container_width=True)
+                st.download_button("📥 تحميل التقرير النهائي (Excel / CSV)", final_report.to_csv(index=False).encode('utf-8-sig'), "Daily_Sales_Report_Formatted.csv", "text/csv")
+            except Exception as e:
+                st.error(f"حدث خطأ أثناء معالجة ملف المدفوعات: {e}")
 
     elif admin_section == "🛒 إدخال المشتريات اليدوية":
         st.subheader("🛒 تسجيل فواتير المشتريات اليدوية")
