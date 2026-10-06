@@ -187,26 +187,26 @@ st.sidebar.markdown(f"**المستخدم:** {st.session_state.name}")
 st.sidebar.markdown(f"**الفرع:** `{st.session_state.branch}`")
 st.sidebar.divider()
 
-# ----------------- واجهة الكاشير / الفرع (التبويبات الجانبية) -----------------
+# ----------------- واجهة الكاشير / الفرع -----------------
 if st.session_state.role == "cashier":
     st.sidebar.markdown("### 🗂️ القائمة الرئيسية للفرع")
     c_mode = st.sidebar.radio("القسم:", [
         "العمليات والتشغيل اليومي", 
+        "🗑️ الهدر والتالف (الإنتاج والمخزون)",
         "📝 تقرير الإغلاق المالي", 
         t.get("count_tab", "الجرد الدوري")
     ])
 
     st.title(f"📍 بوابة الفرع - {st.session_state.name}")
 
-    # 1. إدخال العمليات التشغيلية (الإنتاج، الهدر، المنصرف، التحويلات)
+    # 1. إدخال العمليات التشغيلية العادية
     if c_mode == "العمليات والتشغيل اليومي":
         st.sidebar.markdown("---")
-        st.sidebar.markdown("### ⚙️ نوع العملية")
-        tab_type = st.sidebar.radio("اختر الحركة:", [
+        st.sidebar.markdown("### ⚙️ نوع الحركة")
+        tab_type = st.sidebar.radio("اختر العملية:", [
             t.get("prod_tab", "الإنتاج"), 
             t.get("staff_tab", "وجبات الموظفين"), 
             t.get("consume_tab", "منصرف المخزن"), 
-            t.get("waste_tab", "الهدر"), 
             t.get("transfer_tab", "التحويلات")
         ])
 
@@ -250,7 +250,40 @@ if st.session_state.role == "cashier":
             st.success(f"تم حفظ الحركات بنجاح!")
             st.session_state.ops_rows = [{"item": list(item_dict.keys())[0], "qty": 1.0, "reason": ""}]
 
-    # 2. تقرير إغلاق الكاشير اليومي
+    # 2. الهدر والتالف (للإنتاج أو خامات المخزن)
+    elif c_mode == "🗑️ الهدر والتالف (الإنتاج والمخزون)":
+        st.subheader("🗑️ تسجيل الهدر والتالف اليومي (منتجات نهائية أو خامات مخزن)")
+        
+        waste_target = st.radio("حدد نوع التالف/الهدر:", ["هدر إنتاج (منتجات نهائية)", "هدر خامات مخزن"], horizontal=True)
+        w_source = "production" if "إنتاج" in waste_target else "inventory"
+        
+        df_w_items = pd.read_sql_query("SELECT sku, name_ar, storage_unit FROM items_master WHERE item_type=? ORDER BY name_ar ASC", conn, params=(w_source,))
+        w_item_dict = {f"{r['name_ar']} ({r['sku']})": (r['sku'], r['name_ar'], r['storage_unit']) for _, r in df_w_items.iterrows()}
+        
+        with st.form("waste_form"):
+            w_date = st.date_input("تاريخ الهدر:", value=date.today())
+            
+            if "waste_rows" not in st.session_state:
+                st.session_state.waste_rows = [{"item": list(w_item_dict.keys())[0] if w_item_dict else "", "qty": 1.0, "reason": ""}]
+            
+            st.markdown("#### أصناف التالف:")
+            selected_w_item = st.selectbox("اختر الصنف التالف:", list(w_item_dict.keys()) if w_item_dict else ["لا توجد أصناف"])
+            w_qty = st.number_input("الكمية التالفة:", min_value=0.1, step=0.5, value=1.0)
+            w_reason = st.text_input("سبب التالف / الهدر (إجباري):", placeholder="مثال: احتراق أثناء الشوي / انتهاء صلاحية / سقوط")
+            
+            if st.form_submit_button("💾 تسجيل وترحيل الهدر والتالف للنظام", type="primary", use_container_width=True):
+                if selected_w_item and selected_w_item != "لا توجد أصناف":
+                    sk_w, nm_w, u_w = w_item_dict[selected_w_item]
+                    cursor.execute("""
+                    INSERT INTO operations_log (entry_type, branch, to_branch, entry_date, item_type, item_sku, item_name, quantity, unit, reason, created_by)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, ("الهدر والتالف", st.session_state.branch, "-", str(w_date), w_source, sk_w, nm_w, w_qty, str(u_w), w_reason, st.session_state.user))
+                    conn.commit()
+                    st.success(f"تم تسجيل هدر التالف للصنف ({nm_w}) بكمية {w_qty} بنجاح!")
+                else:
+                    st.warning("يرجى اختيار صنف صحيح!")
+
+    # 3. تقرير إغلاق الكاشير اليومي
     elif c_mode == "📝 تقرير الإغلاق المالي":
         st.subheader("📝 تقرير الإيرادات والمبيعات اليومية المستلمة (Daily Closing Sheet)")
         with st.form("cashier_closing_form"):
@@ -280,7 +313,7 @@ if st.session_state.role == "cashier":
                 conn.commit()
                 st.success("تم إرسال تقرير الإغلاق المالي بنجاح إلى الإدارة والمحاسب!")
 
-    # 3. الجرد الفعلي الدوري
+    # 4. الجرد الفعلي الدوري
     else:
         st.subheader("📋 الجرد الدوري الفعلي للمخزون")
         df_inv = pd.read_sql_query("SELECT sku, name_ar, storage_unit, ingredient_unit FROM items_master WHERE item_type='inventory' ORDER BY name_ar ASC", conn)
